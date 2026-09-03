@@ -1,0 +1,34 @@
+:host {
+  width: var(--sidenav-width, 250px);
+  height: 100%;
+  background: black;
+  display: block;
+  position: relative;
+  z-index: 10;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Right position styling */
+:host.right {
+  margin-left: auto;
+}
+
+/* Add box shadow for better visual separation */
+:host {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile styling */
+@media (max-width: 767px) {
+  :host {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+  }
+
+  :host.right {
+    left: auto;
+    right: 0;
+  }
+}

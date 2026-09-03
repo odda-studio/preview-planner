@@ -1,0 +1,288 @@
+:host {
+  display: block;
+  font-family: 'Epilogue', sans-serif;
+}
+
+.exp-page {
+  padding: 24px 32px;
+  min-height: 100vh;
+  background: #f5f6f7;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────
+
+.exp-header {
+  margin-bottom: 20px;
+}
+
+.exp-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.exp-subtitle {
+  font-size: 13px;
+  color: #888;
+  margin: 4px 0 0;
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+
+.exp-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: #eceeef;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.exp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { color: #1a1a1a; }
+
+  &--active {
+    background: #fff;
+    color: #1a1a1a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.exp-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #e0e0e0;
+  color: #555;
+  font-size: 11px;
+  font-weight: 700;
+
+  .exp-tab--active & {
+    background: #1a1a1a;
+    color: #fff;
+  }
+}
+
+// ── States ─────────────────────────────────────────────────────────────────
+
+.exp-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 0;
+  color: #aaa;
+  font-size: 14px;
+
+  &--error {
+    color: #c5221f;
+  }
+}
+
+.exp-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #26c6da;
+  border-radius: 50%;
+  animation: exp-spin 0.8s linear infinite;
+}
+
+@keyframes exp-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Grid ───────────────────────────────────────────────────────────────────
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+// ── Card ───────────────────────────────────────────────────────────────────
+
+.exp-card {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  border-left: 3px solid #f9a825;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  &--expired {
+    border-left-color: #c5221f;
+  }
+
+  &--active {
+    border-left-color: #2e7d32;
+  }
+}
+
+.exp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.exp-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 16px;
+  font-weight: 700;
+
+  &--expired {
+    background: #fce4ec;
+    color: #c62828;
+  }
+
+  &--active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+}
+
+.exp-card-name-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exp-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exp-email {
+  font-size: 12px;
+  color: #26c6da;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover { text-decoration: underline; }
+}
+
+// ── Card body ──────────────────────────────────────────────────────────────
+
+.exp-card-body {
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+// ── Contracts list ─────────────────────────────────────────────────────────
+
+.exp-contracts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exp-contract {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  background: #f7f8f9;
+  border-radius: 6px;
+}
+
+.exp-contract-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exp-contract-dates {
+  font-size: 11px;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.exp-row-label {
+  font-size: 12px;
+  color: #888;
+}
+
+.exp-row-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: right;
+
+  &--muted {
+    font-weight: 500;
+    color: #aaa;
+  }
+}
+
+// ── Badge ──────────────────────────────────────────────────────────────────
+
+.exp-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+
+  &--danger  { background: #fce4ec; color: #c5221f; }
+  &--warning { background: #fff3e0; color: #e65100; }
+  &--ok      { background: #e8f5e9; color: #2e7d32; }
+  &--neutral { background: #f5f5f5; color: #757575; }
+}

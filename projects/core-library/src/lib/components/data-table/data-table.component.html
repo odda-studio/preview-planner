@@ -1,0 +1,409 @@
+@let tableMetadata = table();
+@let id = identifier();
+@let mobile = isMobile();
+@if (tableMetadata && id) {
+<div class="flex flex-col h-full overflow-hidden">
+  <!-- Toolbar with filter button -->
+  <div class="flex justify-between py-2 px-1">
+    <div class="flex items-center gap-2">
+      <input type="text" placeholder="Search..." 
+      class="py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        [(ngModel)]="query"/>
+    </div>
+    @if(advancedFiltersEnabled()){
+    <button
+      class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+      (click)="onShowFilters()" title="Filtri avanzati">
+      <svg class="w-4 h-4" [attr.fill]="filtersNode() ? 'currentColor' : 'none'" stroke="currentColor"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+        </path>
+      </svg>
+      Filtri avanzati
+    </button>
+    }
+
+  </div>
+  <!-- Grid container -->
+  <div class="overflow-x-auto overflow-y-hidden shadow-md rounded-lg h-full">
+    <div class="w-full text-sm text-left text-gray-700 w-full overflow-y-hidden flex flex-col h-full">
+      <!-- Filters row - Only show on desktop -->
+      @if (!mobile) {
+      <div class="text-xs text-gray-700 rounded-t-lg border-b border-gray-200 py-2 w-full"
+        [style.min-width]="width() + 'px'">
+
+        <div class="flex gap-3 relative">
+          <!-- Empty cell for checkbox column -->
+
+          <div>
+            <button [matMenuTriggerFor]="columnMenu"
+              class="px-1 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                <path fill-rule="evenodd"
+                  d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                  clip-rule="evenodd" />
+              </svg>
+
+            </button>
+            <mat-menu #columnMenu="matMenu" (click)="$event.stopImmediatePropagation()">
+              <div class="flex flex-col">
+                <div class="border-b px-2 py-2">
+                  Scegli le colonne
+                </div>
+                @for (item of allColumns(); track $index) {
+                <mat-checkbox [checked]="!hiddenColumns()[item.field.name!]" (click)="$event.stopImmediatePropagation()"
+                  (change)="toggleColumnVisibility(item.field.name!)">
+                  {{ item.column.label || item.field.label ||
+                  item.column.name }}
+                </mat-checkbox>
+                }
+              </div>
+
+            </mat-menu>
+          </div>
+
+
+
+          @for (field of activeFilters(); track field.column.name) {
+          @if (field.column.filterable) {
+          <lib-base-filter-header [field]="field.field" [column]="field.column" (removeFilter)="removeFilter(field)"
+            [(filterValue)]="filters()[field.field.name!]" (filterValueChange)="filterValueChange($event, field)" />
+          }
+          @else {
+          <div></div>
+          }
+          }
+          <div>
+            <button [matMenuTriggerFor]="menu"
+              class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-2">
+
+              Filtra
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                <path fill-rule="evenodd"
+                  d="M12.53 16.28a.75.75 0 0 1-1.06 0l-7.5-7.5a.75.75 0 0 1 1.06-1.06L12 14.69l6.97-6.97a.75.75 0 1 1 1.06 1.06l-7.5 7.5Z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
+            <mat-menu #menu="matMenu">
+              @for (item of availableFilters(); track $index) {
+              <button mat-menu-item (click)="addFilter(item)">{{ item.column.label || item.field.label ||
+                item.column.name }}</button>
+              }
+            </mat-menu>
+          </div>
+          <!-- Action column header for filter row -->
+        </div>
+      </div>
+      }
+
+      <!-- Desktop View -->
+      @if (!mobile) {
+      <div [style.min-width]="width() + 'px'">
+        <!-- Column headers row -->
+        <div class="grid  font-semibold text-xs uppercase border-b shadow-sm"
+          [style.grid-template-columns]="gridTemplateColumns()">
+          <!-- Checkbox column header -->
+          @if (allowSelection()) {
+          <div class="px-3 py-3 relative bg-black text-white flex items-center justify-center">
+            <input type="checkbox" class="w-4 h-4 cursor-pointer" [checked]="selectedAll()"
+              [indeterminate]="isIndeterminate()" (change)="toggleSelectAll()" title="Seleziona tutti" />
+          </div>
+          }
+
+          @for (field of columns(); track field.column.name) {
+          <div class="px-6 py-3 relative bg-black text-white">
+            <div class="flex items-center justify-between">
+              @let headerComponent = components[field.column.headerTemplateName!];
+              @if (headerComponent) {
+              <ng-container *ngComponentOutlet="headerComponent; inputs: {
+                        field: field.field,
+                        tableField: field.column,
+                        value: field.column.label || field.column.name,
+                        context: null
+                      }"></ng-container>
+              } @else {
+              <span>{{ field.column.label || field.field.label || field.column.name }}</span>
+              }
+              @if (field.column.sortable) {
+              @let sortState = getSortState(field.field.name!);
+              <button class="ml-2 text-white hover:text-gray-300 transition-colors cursor-pointer"
+                (click)="toggleSort(field.field.name!)"
+                [title]="sortState === null ? 'Ordina' : sortState === 'asc' ? 'Ordinamento crescente' : 'Ordinamento decrescente'">
+                @if (sortState === null) {
+                <!-- Both arrows when not sorted -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                </svg>
+                } @else if (sortState === 'asc') {
+                <!-- Arrow up for ascending -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                </svg>
+                } @else {
+                <!-- Arrow down for descending -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+                }
+              </button>
+              }
+            </div>
+          </div>
+          }
+          <!-- Action column header -->
+          @if (showActionsColumn()) {
+          <div class="px-6 py-3 relative bg-black text-white">
+            <div class="flex items-center justify-between">
+              <span>Actions</span>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      <div [style.min-width]="width() + 'px'" class="overflow-x-hidden overflow-y-auto">
+
+
+        @for (row of dataRows(); track row.__identifier; let first = $first; let last = $last) {
+        <div class="grid border-b transition-colors duration-150 ease-in-out bg-white w-full"
+          [class.rounded-b-md]="last" [class.hover:bg-blue-50]="true" [class.hover:shadow-sm]="true"
+          [style.grid-template-columns]="gridTemplateColumns()">
+          <!-- Checkbox column -->
+          @if (allowSelection()) {
+          <div class="px-3 py-4 flex items-center justify-center">
+            <input type="checkbox" class="w-4 h-4 cursor-pointer" [checked]="isRowSelected(row)"
+              (change)="toggleRowSelection(row)" />
+          </div>
+          }
+
+          @for (col of columns(); track col.column.name!) {
+          @let value = row[col.field.name!];
+          <div class="px-6 py-4 text-ellipsis column">
+            @let component = components[(col.column.templateName! || col.field.type!)];
+            @if (component) {
+            <ng-container *ngComponentOutlet="component; inputs: {
+                        field: col.field,
+                        tableField: col.column,
+                        value: value,
+                        context: row,
+                        componentContext: this
+                      }"></ng-container>
+            } @else {
+            <lib-base-column-render [field]="col.field" [tableField]="col.column" [value]="value" [context]="row"
+              [componentContext]="this" />
+            }
+          </div>
+          }
+          <!-- Action buttons -->
+          @if (showActionsColumn()) {
+          <div class="px-6 py-4 flex items-center space-x-2">
+            @if (metadata().enablePatch) {
+            <button class="p-1 text-black hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors"
+              (click)="onUpdate(row)" title="Edit">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                </path>
+              </svg>
+            </button>
+            }
+            @if (metadata().enableDelete) {
+            <button class="p-1 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors"
+              (click)="onDelete(row)" title="Delete">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
+              </svg>
+            </button>
+            }
+
+            @if (metadata().enablePost) {
+            <button class="p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors"
+              title="Copy">
+              <svg (click)="onCopy(row)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                </path>
+              </svg>
+            </button>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Mobile View - List Layout -->
+      @if (mobile) {
+      <div class="divide-y divide-gray-200 text-black overflow-auto">
+        @for (row of dataRows(); track row.__identifier) {
+        <div class="p-4 bg-white">
+          <div class="flex justify-between items-start mb-2">
+            <!-- Main identifier/title -->
+            @let mainField = mobileColumns()[0];
+            @let mainValue = row[mainField.field.name!];
+            <div class="font-medium text-base text-gray-900">
+              @let component = components[(mainField.column.templateName! || mainField.field.type!)];
+              @if (component) {
+              <ng-container *ngComponentOutlet="component; inputs: {
+                        field: mainField.field,
+                        tableField: mainField.column,
+                        value: mainValue,
+                        context: row
+                      }"></ng-container>
+              } @else {
+              {{ mainValue }}
+              }
+            </div>
+
+            <!-- Action buttons -->
+            @if (showActionsColumn()) {
+            <div class="flex space-x-1">
+              @if (metadata().enablePatch) {
+              <button class="p-1 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-100 transition-colors"
+                (click)="onUpdate(row)" title="Edit">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                  </path>
+                </svg>
+              </button>
+              }
+              @if (metadata().enableDelete) {
+              <button class="p-1 text-red-600 hover:text-red-800 rounded-full hover:bg-red-100 transition-colors"
+                (click)="onDelete(row)" title="Delete">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                  </path>
+                </svg>
+              </button>
+              }
+              @if (metadata().enablePost) {
+              <button class="p-1 text-green-600 hover:text-green-800 rounded-full hover:bg-green-100 transition-colors"
+                title="Copy">
+                <svg (click)="onCopy(row)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                  </path>
+                </svg>
+              </button>
+              }
+            </div>
+            }
+          </div>
+
+          <!-- Additional fields -->
+          <div class="mt-2 text-sm text-gray-700">
+            @for (col of mobileColumns().slice(1); track col.column.name!) {
+            @let value = row[col.field.name!];
+            <div class="flex items-center py-1">
+              <span class="font-medium mr-2">
+                @let headerComponent = components[col.column.headerTemplateName!];
+                @if (headerComponent) {
+                <ng-container *ngComponentOutlet="headerComponent; inputs: {
+                            field: col.field,
+                            tableField: col.column,
+                            value: col.column.label || col.column.name,
+                            context: null
+                          }"></ng-container>
+                } @else {
+                {{ col.column.label || col.column.name }}
+                }
+                :
+              </span>
+              <span>
+                @let component = components[(col.column.templateName! || col.field.type!)];
+                @if (component) {
+                <ng-container *ngComponentOutlet="component; inputs: {
+                            field: col.field,
+                            tableField: col.column,
+                            value: value,
+                            context: row
+                          }"></ng-container>
+                } @else {
+                {{ value }}
+                }
+              </span>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Empty state -->
+      @if (dataRows().length === 0) {
+      <div class="grid bg-white border-t rounded-b-md shadow-sm" [style.grid-template-columns]="'1fr'">
+        <div class="px-6 py-8 text-center text-gray-500 italic">
+          <span class="font-medium">No data available</span>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Pagination controls -->
+  <div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+    <div class="flex items-center">
+      <label for="pageSize" class="mr-2 text-sm text-gray-700">Show:</label>
+      <select id="pageSize"
+        class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        [value]="pageSize()" (change)="changePageSize(+$any($event.target).value)">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+
+    <div class="flex items-center">
+      <span class="text-sm text-gray-700">
+        Showing <span class="font-medium">{{ (currentPage() - 1) * pageSize() + 1 }}</span> to
+        <span class="font-medium">{{ Math.min(currentPage() * pageSize(), totalCount()) }}</span> of
+        <span class="font-medium">{{ totalCount() }}</span> results
+      </span>
+    </div>
+
+    <div class="flex items-center space-x-2">
+      <!-- Previous page button -->
+      <button
+        class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="currentPage() === 1" (click)="previousPage()">
+        Previous
+      </button>
+
+      <!-- Page numbers -->
+      @for (page of paginationRange; track page) {
+      <button class="px-3 py-1 text-sm font-medium rounded-md" [class.bg-blue-600]="page === currentPage()"
+        [class.text-white]="page === currentPage()" [class.bg-white]="page !== currentPage()"
+        [class.text-gray-700]="page !== currentPage()" [class.border]="page !== currentPage()"
+        [class.border-gray-300]="page !== currentPage()" (click)="goToPage(page)">
+        {{ page }}
+      </button>
+      }
+
+      <!-- Next page button -->
+      <button
+        class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="currentPage() === totalPages" (click)="nextPage()">
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+}

@@ -1,0 +1,42 @@
+@let tableMetadata = table();
+@let id = identifier();
+@if (tableMetadata && id) {
+  <div class="table">
+    <div class="row" [style.grid-template-columns]="gridTemplateColumns()">
+      @for (field of columns(); track field.column.name) {
+        <div class="cell-header">
+          @let headerComponent = components[field.column.headerTemplateName!];
+          @if(headerComponent) {
+            <ng-container *ngComponentOutlet="headerComponent; inputs: {
+              field: field.field,
+              tableField: field.column,
+              value: field.column.label,
+              context: null
+            }"></ng-container>
+          } @else {
+            {{ field.column.label }}
+          }
+        </div>
+      }
+    </div>
+    @for (row of dataRows(); track row.__identifier) {
+      <div class="row" [style.grid-template-columns]="gridTemplateColumns()">
+        @for (col of columns(); track col.column.name!) {
+          @let value = row[col.field.name!];
+          @let component = components[(col.column.templateName! || col.field.type!)];
+          @if(component) {
+            <ng-container *ngComponentOutlet="component; inputs: {
+            field: col.field,
+            tableField: col.column,
+            value: value,
+            context: row
+            }"></ng-container>
+          } @else {
+            <div class="cell">{{ value }}</div>
+          }
+        }
+
+      </div>
+    }
+  </div>
+}

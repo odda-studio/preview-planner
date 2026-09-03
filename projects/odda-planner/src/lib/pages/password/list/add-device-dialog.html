@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>Aggiungi Nuovo Dispositivo</h2>
+
+<mat-dialog-content>
+  <form class="pt-4" [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome Dispositivo</mat-label>
+      <input matInput formControlName="deviceName" placeholder="es. MacBook Pro di Giovanni" />
+      @if (form.controls['deviceName'].hasError('required')) {
+        <mat-error>Il nome del dispositivo è obbligatorio</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Password di Protezione</mat-label>
+      <input matInput type="password" formControlName="password" placeholder="Inserisci password sicura" [required]="!form.value.directAccessMode" />
+      @if (form.controls['password'].hasError('required')) {
+        <mat-error>La password è obbligatoria</mat-error>
+      }
+      @if (form.controls['password'].hasError('minlength')) {
+        <mat-error>La password deve avere almeno 8 caratteri</mat-error>
+      }
+      @if (!form.value.directAccessMode) {
+        <mat-hint>Questa password proteggerà le chiavi crittografiche del dispositivo</mat-hint>
+      } @else {
+        <mat-hint>Password non richiesta in modalità accesso diretto</mat-hint>
+      }
+    </mat-form-field>
+
+    <div class="direct-access-mode-section">
+      <mat-checkbox formControlName="directAccessMode" color="warn">
+        <strong>Accesso Diretto</strong> - Non richiedere mai password
+      </mat-checkbox>
+      
+      @if (form.value.directAccessMode) {
+        <div class="warning-box">
+          <mat-icon>warning</mat-icon>
+          <div>
+            <strong>⚠️ ATTENZIONE: Rischio Sicurezza!</strong>
+            <p>
+              In modalità accesso diretto, la chiave privata viene salvata <strong>NON cifrata</strong> nel browser.
+              Chiunque acceda al tuo computer/browser potrà accedere a tutte le password senza inserire nessuna password.
+            </p>
+            <ul>
+              <li class="flex">✅ <strong>Pro:</strong> Accesso immediato, nessuna password da ricordare</li>
+              <li class="flex">❌ <strong>Contro:</strong> Se qualcuno accede al tuo dispositivo → accede a TUTTO</li>
+            </ul>
+            <p><strong>Usa solo su dispositivi personali e sicuri!</strong></p>
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+
+  @if (!form.value.directAccessMode) {
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <div>
+        <strong>Perché serve una password?</strong>
+        <p>
+          La password protegge le chiavi crittografiche generate per questo dispositivo.
+          Conservala in modo sicuro, ti servirà per accedere alle password salvate.
+        </p>
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Annulla</button>
+  <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="!form.valid || isLoading()">
+    @if (isLoading()) {
+      <mat-spinner diameter="20"></mat-spinner>
+    } @else {
+      Aggiungi Dispositivo
+    }
+  </button>
+</mat-dialog-actions>

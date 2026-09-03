@@ -1,0 +1,42 @@
+
+<!--<div class="calendar-container calendar-container-daily">-->
+<!--  <div class="calendar-container-daily-day"-->
+<!--       [id]="'hour_' + i"-->
+<!--       *ngFor="let hour of [].constructor(24); let i = index">-->
+<!--    <div class="calendar-container-daily-day-header">-->
+<!--      <div class="calendar-container-daily-day-header-hour">-->
+<!--        {{getHour(i) | date : 'HH:mm'}}-->
+<!--      </div>-->
+<!--      <div class="calendar-container-daily-day-header-divider">-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="calendar-container-daily-day-quarters ml-16">-->
+<!--      <div class="calendar-container-daily-day-quarters-quarter"-->
+<!--           style="cursor: pointer"-->
+<!--           *ngFor="let quarter of [].constructor(4); let iq = index"-->
+<!--           (dblclick)="addEvent(i, iq)"-->
+<!--      >-->
+<!--        <div resizable [sizeStep]="24"-->
+<!--             (resizeChanged)="sizeChanged(ev, $event)"-->
+<!--             (draggingChange)="dragging = $event"-->
+<!--             *ngFor="let ev of getEvents(i, iq)"-->
+<!--             class="w-full"-->
+<!--             [innerElement]="innerElement">-->
+<!--          <div class="calendar-container-daily-day-quarters-quarter-event"-->
+<!--               #innerElement-->
+<!--          >-->
+<!--            {{ev.title}}-->
+<!--            {{ev.start | date : 'HH:mm'}}/-->
+<!--            {{ev.end | date : 'HH:mm'}}-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="calendar-container timeline" [ngStyle]="{top: getTop()}">-->
+
+<!--    </div>-->
+
+<!--  </div>-->
+
+<!--</div>-->

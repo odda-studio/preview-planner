@@ -1,0 +1,23 @@
+{
+  "name": "cv-docxtemplater-node",
+  "version": "1.0.0",
+  "description": "Compila un template DOCX CV con docxtemplater e dati JSON.",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "build:cv": "node index.js",
+    "api": "node server.js",
+    "api-local": "BASE_URL=http://localhost:4200 node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "docx": "^9.6.1",
+    "docxtemplater": "^3.67.5",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.8.0",
+    "html-pdf-node": "^1.0.8",
+    "multer": "^2.0.2",
+    "pizzip": "^3.2.0"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "modelPropertyNaming": "camelCase",
+  "operationIdNaming": "x-operation-name",
+  "useSingleRequestParameter": true
+}

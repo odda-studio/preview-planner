@@ -1,0 +1,96 @@
+<div>
+  <button [matMenuTriggerFor]="menu" #trigger="matMenuTrigger"
+    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-2">
+
+    <span>{{ column().label || field().label || column().name  || field().name }}</span>
+    @if (filterDisplayText()) {
+    <span [title]="filterDisplayText()" class="text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded max-w-32 overflow-hidden whitespace-nowrap text-ellipsis">
+      {{ filterDisplayText() }}
+    </span>
+    }
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+      <path fill-rule="evenodd"
+        d="M12.53 16.28a.75.75 0 0 1-1.06 0l-7.5-7.5a.75.75 0 0 1 1.06-1.06L12 14.69l6.97-6.97a.75.75 0 1 1 1.06 1.06l-7.5 7.5Z"
+        clip-rule="evenodd" />
+    </svg>
+  </button>
+  <mat-menu #menu="matMenu" (click)="$event.stopImmediatePropagation()">
+    <div (click)="$event.stopImmediatePropagation()"
+      class="flex flex-col overflow-hidden mt-1 z-1 rounded-sm">
+      <div class="h-full overflow-hidden thin-scrollbar">
+        @if (hasOptions()) {
+        <!-- Checkboxes for fields with options -->
+        <div class="flex flex-col pr-2 px-4 py-3">
+          @for (option of options(); track option.value) {
+          <mat-checkbox [checked]="$any(stringFilterValue())[option.value]" (change)="selectValue(option)">
+            {{ option.label }} 
+          </mat-checkbox>
+          }
+        </div>
+        }
+        @else if (type() === 'checkbox') {
+        <!-- Radio buttons for boolean fields -->
+        <mat-radio-group [(ngModel)]="stringFilterValue" class="flex flex-col px-4 py-3">
+          <mat-radio-button value="">Tutti</mat-radio-button>
+          <mat-radio-button value="true">Sì</mat-radio-button>
+          <mat-radio-button value="false">No</mat-radio-button>
+        </mat-radio-group>
+        } @else if (type() === 'number') {
+        <div class="w-full px-4 py-3">
+          <input type="number" class="filter-input" (keyup.enter)="applyFilter()" [placeholder]="placeholder()"
+            [(ngModel)]="stringFilterValue" />
+        </div>
+        } @else {
+        <div class="w-full px-4 py-3">
+          <input [type]="type()" class="filter-input" (keyup.enter)="applyFilter()" [placeholder]="placeholder()"
+            [(ngModel)]="stringFilterValue" />
+        </div>
+        }
+
+        @if(lookup()) {
+          <div class="flex flex-col flex-1 pr-2 px-4 py-3  max-h-92 overflow-auto thin-scrollbar">
+          
+          @for (option of wrappedOptions(); track option.value) {
+          <mat-checkbox [checked]="selection()[option.id]" (change)="selectLokupValue(option)">
+            {{ option.label }}
+          </mat-checkbox>
+          }
+        </div>
+        }
+
+        <!-- Filter operations as radio buttons -->
+        @let ops = filterOperations();
+        @if (ops.length > 1) {
+        <div class="border-t border-gray-200 px-4 py-3">
+          <div class="text-xs font-medium text-gray-500 mb-2">Operazione</div>
+          <mat-radio-group [(ngModel)]="filterOperator" class="flex flex-col gap-1">
+            @for (op of filterOperations(); track op.operator) {
+            <mat-radio-button [value]="op.operator" class="text-sm">
+              <span class="mr-1">{{ op.icon }}</span> {{ op.label }}
+            </mat-radio-button>
+            }
+          </mat-radio-group>
+        </div>
+        }
+      </div>
+
+
+      <!-- Operation selector button -->
+      <div class="flex gap-0.5 p-3 justify-end">
+
+
+        <!-- Clear button -->
+
+        <button class="clear-button" (click)="removeFilter.emit()">
+          Rimuovi filtro
+        </button>
+        <button class="apply-button" (click)="applyFilter();">
+          Applica filtro
+        </button>
+
+      </div>
+
+    </div>
+  </mat-menu>
+
+</div>

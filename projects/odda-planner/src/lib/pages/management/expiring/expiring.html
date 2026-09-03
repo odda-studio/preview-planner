@@ -1,0 +1,216 @@
+<div class="exp-page">
+  <div class="exp-header">
+    <h1 class="exp-title">Scadenze Consulenti</h1>
+    <p class="exp-subtitle">Consulenti con ordine d'acquisto attivo, in scadenza o già scaduto</p>
+  </div>
+
+  <div class="exp-tabs" role="tablist">
+    <button type="button" role="tab" class="exp-tab" [class.exp-tab--active]="activeTab() === 'active'"
+      [attr.aria-selected]="activeTab() === 'active'" (click)="setTab('active')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Attivi
+      <span class="exp-tab-count">{{ activeItems().length }}</span>
+    </button>
+    <button type="button" role="tab" class="exp-tab" [class.exp-tab--active]="activeTab() === 'expiring'"
+      [attr.aria-selected]="activeTab() === 'expiring'" (click)="setTab('expiring')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      In scadenza
+      <span class="exp-tab-count">{{ expiringItems().length }}</span>
+    </button>
+    <button type="button" role="tab" class="exp-tab" [class.exp-tab--active]="activeTab() === 'expired'"
+      [attr.aria-selected]="activeTab() === 'expired'" (click)="setTab('expired')">
+      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      Scaduti
+      <span class="exp-tab-count">{{ expiredItems().length }}</span>
+    </button>
+  </div>
+
+  @if (activeTab() === 'active') {
+  <div class="exp-panel">
+    @if (active.isLoading()) {
+    <div class="exp-state">
+      <span class="exp-spinner"></span>
+      <span>Caricamento in corso…</span>
+    </div>
+    } @else if (active.error()) {
+    <div class="exp-state exp-state--error">
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      </svg>
+      <span>Errore nel caricamento degli utenti attivi</span>
+    </div>
+    } @else if (!activeItems().length) {
+    <div class="exp-state">
+      <svg width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Nessun utente attivo</span>
+    </div>
+    } @else {
+    <div class="exp-grid">
+      @for (item of activeItems(); track trackByUserId($index, item)) {
+      <div class="exp-card exp-card--active">
+        <div class="exp-card-header">
+          <div class="exp-avatar exp-avatar--active">{{ initials(item.fullName) }}</div>
+          <div class="exp-card-name-wrap">
+            <span class="exp-name">{{ item.fullName ?? '–' }}</span>
+            @if (item.email) {
+            <a class="exp-email" [href]="'mailto:' + item.email">{{ item.email }}</a>
+            }
+          </div>
+        </div>
+        <div class="exp-card-body">
+          @if (item.clients?.length) {
+          <div class="exp-contracts">
+            @for (contract of item.clients; track contract.companyId) {
+            <div class="exp-contract">
+              <span class="exp-contract-name">{{ contract.companyName ?? '–' }}</span>
+              <span class="exp-contract-dates">{{ formatDate(contract.startDate) }} – {{ formatDate(contract.endDate) }}</span>
+            </div>
+            }
+          </div>
+          } @else {
+          <span class="exp-row-value exp-row-value--muted">Nessun contratto attivo</span>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  } @else if (activeTab() === 'expiring') {
+  <div class="exp-panel">
+    @if (expiring.isLoading()) {
+    <div class="exp-state">
+      <span class="exp-spinner"></span>
+      <span>Caricamento in corso…</span>
+    </div>
+    } @else if (expiring.error()) {
+    <div class="exp-state exp-state--error">
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      </svg>
+      <span>Errore nel caricamento degli utenti in scadenza</span>
+    </div>
+    } @else if (!expiringItems().length) {
+    <div class="exp-state">
+      <svg width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Nessun utente con ordine in scadenza</span>
+    </div>
+    } @else {
+    <div class="exp-grid">
+      @for (item of expiringItems(); track trackByUserId($index, item)) {
+      <div class="exp-card">
+        <div class="exp-card-header">
+          <div class="exp-avatar">{{ initials(item.fullName) }}</div>
+          <div class="exp-card-name-wrap">
+            <span class="exp-name">{{ item.fullName ?? '–' }}</span>
+            @if (item.email) {
+            <a class="exp-email" [href]="'mailto:' + item.email">{{ item.email }}</a>
+            }
+          </div>
+        </div>
+        <div class="exp-card-body">
+          <div class="exp-row">
+            <span class="exp-row-label">Scadenza ordine</span>
+            <span class="exp-row-value">{{ formatDate(item.orderEndDate) }}</span>
+          </div>
+          <div class="exp-row">
+            <span class="exp-row-label">Giorni alla scadenza</span>
+            <span class="exp-badge" [class]="expirationUrgencyClass(item.daysToExpiration)">
+              {{ daysLabel(item.daysToExpiration) }}
+            </span>
+          </div>
+          @if (item.nextContractStartDate) {
+          <div class="exp-row">
+            <span class="exp-row-label">Prossimo contratto</span>
+            <span class="exp-row-value">{{ formatDate(item.nextContractStartDate) }}</span>
+          </div>
+          @if (item.daysAfterExpirationToNextContract != null) {
+          <div class="exp-row">
+            <span class="exp-row-label">Giorni di scopertura</span>
+            <span class="exp-row-value">{{ item.daysAfterExpirationToNextContract }}</span>
+          </div>
+          }
+          } @else {
+          <div class="exp-row">
+            <span class="exp-row-label">Prossimo contratto</span>
+            <span class="exp-row-value exp-row-value--muted">Non pianificato</span>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="exp-panel">
+    @if (expired.isLoading()) {
+    <div class="exp-state">
+      <span class="exp-spinner"></span>
+      <span>Caricamento in corso…</span>
+    </div>
+    } @else if (expired.error()) {
+    <div class="exp-state exp-state--error">
+      <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      </svg>
+      <span>Errore nel caricamento degli utenti scaduti</span>
+    </div>
+    } @else if (!expiredItems().length) {
+    <div class="exp-state">
+      <svg width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>Nessun utente scaduto</span>
+    </div>
+    } @else {
+    <div class="exp-grid">
+      @for (item of expiredItems(); track trackByUserId($index, item)) {
+      <div class="exp-card exp-card--expired">
+        <div class="exp-card-header">
+          <div class="exp-avatar exp-avatar--expired">{{ initials(item.fullName) }}</div>
+          <div class="exp-card-name-wrap">
+            <span class="exp-name">{{ item.fullName ?? '–' }}</span>
+            @if (item.email) {
+            <a class="exp-email" [href]="'mailto:' + item.email">{{ item.email }}</a>
+            }
+          </div>
+        </div>
+        <div class="exp-card-body">
+          <div class="exp-row">
+            <span class="exp-row-label">Ultima attività</span>
+            <span class="exp-row-value">{{ formatDate(item.lastActivityDate) }}</span>
+          </div>
+          <div class="exp-row">
+            <span class="exp-row-label">Giorni senza attività</span>
+            <span class="exp-badge" [class]="inactivityUrgencyClass(item.daysSinceLastActivity)">
+              {{ daysLabel(item.daysSinceLastActivity) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</div>

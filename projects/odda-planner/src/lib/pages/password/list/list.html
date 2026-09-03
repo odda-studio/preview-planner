@@ -1,0 +1,529 @@
+<div class="password-vault-container">
+  <!-- Beta Disclaimer -->
+  <div class="beta-disclaimer">
+    <div class="beta-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    </div>
+    <div class="beta-content">
+      <strong>⚠️ Funzionalità Beta</strong>
+      <span>Il Password Vault è in fase di test. Usa con cautela e mantieni backup delle password importanti.</span>
+    </div>
+  </div>
+
+  <!-- Device Authorization Banner -->
+  @if (!hasLocalDeviceKeys() && devices.value()?.length) {
+  <div class="device-auth-banner">
+    <div class="banner-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+        <line x1="12" y1="18" x2="12" y2="18" />
+      </svg>
+    </div>
+    <div class="banner-content">
+      <h3>Dispositivo non autorizzato</h3>
+      <p>Questo dispositivo non ha accesso al vault. Autorizza questo dispositivo per gestire le tue password.</p>
+      <div class="banner-actions">
+        <button class="btn-primary-sm" (click)="authorizeThisDevice()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Autorizza Questo Dispositivo
+        </button>
+        <button class="btn-secondary-sm" (click)="importClonedDeviceKeys()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Clona Dispositivo
+        </button>
+        <button class="btn-secondary-sm" (click)="migrateSecretsFromOldDevice()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 1l4 4-4 4" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <path d="M7 23l-4-4 4-4" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+          </svg>
+          Migra Password
+        </button>
+        @if (devices.value() && devices.value()!.length > 0) {
+        <button class="btn-secondary-sm" (click)="showRecoverDeviceList()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+          </svg>
+          Recupera Dispositivo Esistente
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Session Status Bar -->
+  <div class="session-status-bar" [class.unlocked]="isSessionUnlocked()">
+    <div class="status-content">
+      <div class="status-icon">
+        @if (isSessionUnlocked()) {
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+        </svg>
+        } @else {
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        }
+      </div>
+      <div class="status-text">
+        @if (isSessionUnlocked()) {
+        <strong>Sessione sbloccata</strong>
+        @if (isDirectAccessModeActive()) {
+        <span>Accesso Diretto: accesso automatico senza password</span>
+        } @else {
+        <span>La chiave privata è caricata in memoria. Auto-lock tra 30 minuti.</span>
+        }
+        } @else {
+        <strong>Sessione bloccata</strong>
+        @if (isDirectAccessModeActive()) {
+        <span>Accesso Diretto: clicca Sblocca per accesso automatico</span>
+        } @else {
+        <span>Sblocca la sessione per accedere alle password salvate</span>
+        }
+        }
+        @if (hasRecoveryBackup()) {
+        <span class="recovery-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          Recovery Backup disponibile
+        </span>
+        }
+        @if (isDirectAccessModeActive()) {
+        <span class="direct-access-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+          Accesso Diretto
+        </span>
+        }
+      </div>
+    </div>
+    <div class="status-actions">
+      @if (isSessionUnlocked()) {
+      <button class="btn-lock" (click)="lockSession()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        Blocca
+      </button>
+      } @else {
+      <button class="btn-unlock" (click)="unlockSession()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+        </svg>
+        Sblocca Sessione
+      </button>
+      }
+    </div>
+  </div>
+
+  <div class="header flex flex-col lg:flex-row">
+    <div class="header-title" (click)="toggleDevicesSection()"
+      style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+      <h2>Dispositivi Autorizzati</h2>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        [style.transform]="showDevices() ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.2s ease;">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary flex gap-2 items-center p-2" (click)="exportDeviceKeysForCloning()"
+        title="Clona le chiavi di questo dispositivo su un altro">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+        Clona Dispositivo
+      </button>
+      <button class="btn-secondary flex gap-2 items-center p-2" (click)="importDeviceKeys()"
+        title="Importa backup del dispositivo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Importa Backup
+      </button>
+      <button class="btn-secondary flex gap-2 items-center p-2  " (click)="exportDeviceKeys()"
+        title="Esporta backup del dispositivo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        Esporta Backup
+      </button>
+
+    </div>
+  </div>
+
+  @if (showDevices()) {
+  @if (devices.value()?.length) {
+  <div class="devices-grid">
+    @for (device of devices.value(); track device.deviceId) {
+    <div class="device-card" [class.current-device]="device.publicKeySpkiBase64 === currentDevicePublicKey()">
+      <div class="device-header">
+        <div class="device-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+            <line x1="12" y1="18" x2="12" y2="18" />
+          </svg>
+        </div>
+        <div class="device-info">
+          <h3>{{ device.deviceName || 'Dispositivo senza nome' }}</h3>
+          @if (device.publicKeySpkiBase64 === currentDevicePublicKey()) {
+          <span class="badge current">Questo dispositivo</span>
+          }
+        </div>
+      </div>
+
+      <div class="device-details">
+        <div class="detail-row">
+          <span class="label">ID Dispositivo:</span>
+          <span class="value">{{ device.deviceId }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Stato:</span>
+          <span class="badge authorized">Autorizzato</span>
+        </div>
+      </div>
+
+      <div class="device-actions">
+        @if (device.publicKeySpkiBase64 === currentDevicePublicKey()) {
+        <button class="btn-secondary btn-sm" (click)="editDevice(device)">Modifica</button>
+        <button class="btn-danger btn-sm" (click)="revokeDevice(device)">Revoca</button>
+        } @else {
+        <button class="btn-primary btn-sm" (click)="recoverDevice(device)"
+          title="Recupera questo dispositivo usando il Recovery Code e il file di backup">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+          </svg>
+          Recupera Dispositivo
+        </button>
+        <button class="btn-danger btn-sm" (click)="revokeDevice(device)">Elimina</button>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+    </div>
+    <h3>Nessun dispositivo autorizzato</h3>
+    <p class="disclaimer">
+      Per gestire le password in modo sicuro, devi autorizzare almeno un dispositivo.
+      Il sistema di <strong>Vault Gestione Password</strong> protegge i tuoi dati con crittografia end-to-end.
+    </p>
+    <button class="btn-primary" (click)="createNew()">
+      <span class="icon">+</span>
+      Autorizza Primo Dispositivo
+    </button>
+  </div>
+  }
+  }
+
+  <!-- Password Section -->
+  <div class="passwords-section">
+    <div class="section-header flex flex-col lg:flex-row">
+      <div class="header-actions w-full flex flex-col lg:flex-row gap-2">
+        <div class="search-box w-full lg:w-auto">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            class="search-icon">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <input type="text" placeholder="Cerca password..." [value]="searchTerm()"
+            (input)="searchTerm.set($any($event.target).value)" class="search-input !w-full lg:w-auto" />
+          @if (searchTerm()) {
+          <button class="clear-search" (click)="searchTerm.set('')" title="Cancella ricerca">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          }
+        </div>
+        <div class="flex gap-4">
+          <button class="btn-secondary flex gap-2 p-2 items-center justify-center" (click)="toggleViewMode()"
+            title="{{ viewMode() === 'list' ? 'Vista Cartelle' : 'Vista Lista' }}">
+            @if (viewMode() === 'list') {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            } @else {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            }
+          </button>
+          @if (viewMode() === 'folders') {
+          <button class="btn-secondary flex gap-2 p-2 items-center justify-center" (click)="createFolder()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              <line x1="12" y1="11" x2="12" y2="17" />
+              <line x1="9" y1="14" x2="15" y2="14" />
+            </svg>
+            <span class="hidden lg:block">
+              Nuova Cartella
+            </span>
+          </button>
+          }
+          <button class="btn-add" (click)="addPassword()">
+            <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                class="size-5">
+                <path fill-rule="evenodd"
+                  d="M15.75 1.5a6.75 6.75 0 0 0-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 0 0-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 0 0 .75-.75v-1.5h1.5A.75.75 0 0 0 9 19.5V18h1.5a.75.75 0 0 0 .53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1 0 15.75 1.5Zm0 3a.75.75 0 0 0 0 1.5A2.25 2.25 0 0 1 18 8.25a.75.75 0 0 0 1.5 0 3.75 3.75 0 0 0-3.75-3.75Z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <span class="hidden lg:block">
+              Aggiungi Password
+            </span>
+          </button>
+          <button class="btn-secondary flex gap-2 p-2 items-center justify-center" (click)="openGroupsDialog()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span class="hidden lg:block">
+              Gruppi
+            </span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    @if (viewMode() === 'folders') {
+    <!-- Vista Cartelle -->
+    <div class="folders-view pb-4">
+      @if (folders.value() && folders.value()!.length > 0) {
+      <div class="breadcrumb">
+        <button class="breadcrumb-item" [class.active]="selectedFolderId() === null" (click)="selectFolder(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          </svg>
+          Tutte le cartelle
+        </button>
+        @if (selectedFolderId() !== null) {
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-item active">
+          {{ selectedFolderName() }}
+        </span>
+        }
+      </div>
+
+      @if (selectedFolderId() === null && !searchTerm()) {
+      <!-- Mostra tutte le cartelle -->
+      <div class="folders-grid">
+        @for (folder of folders.value(); track folder.folderId) {
+        <div class="folder-card" (click)="selectFolder(folder.folderId!)">
+          <div class="flex gap-4">
+            <div class="folder-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <div class="w-full overflow-hidden">
+              <h2 class="font-bold">{{ folder.name }}</h2>
+              @if (folder.description) {
+              <p class="text-xs text-ellipsis whitespace-nowrap overflow-hidden">{{ folder.description }}</p>
+              }
+            </div>
+          </div>
+
+
+          <div class="flex justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="folder-info">
+
+              <div class="folder-stats">
+                <span class="stat">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  {{ folder.secretCount || 0 }} password
+                </span>
+              </div>
+            </div>
+            <button class="btn-icon" (click)="editFolder(folder)" title="Modifica cartella">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+            <button class="btn-icon danger" (click)="deleteFolder(folder)" title="Elimina cartella">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      }
+      }
+      @if (!folders.value()?.length) {
+      <div class="empty-folders">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+        <h4>Nessuna cartella creata</h4>
+        <p>Organizza le tue password creando cartelle</p>
+        <button class="btn-primary-sm flex items-ce" (click)="createFolder()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            <line x1="12" y1="11" x2="12" y2="17" />
+            <line x1="9" y1="14" x2="15" y2="14" />
+          </svg>
+          Crea Prima Cartella
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    @if (searchTerm() && filteredSecrets().length === 0 && secrets.value()?.length) {
+    <div class="no-results">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+        <line x1="11" y1="8" x2="11" y2="14" />
+        <line x1="11" y1="16" x2="11" y2="16" />
+      </svg>
+      <h3>Nessun risultato trovato</h3>
+      <p>Nessuna password corrisponde a "{{ searchTerm() }}"</p>
+      <button class="btn-secondary" (click)="searchTerm.set('')">Cancella ricerca</button>
+    </div>
+    } @else if (filteredSecrets().length) {
+    <div class="passwords-list">
+      @for (secret of filteredSecrets(); track secret.secretId) {
+      <div class="password-card flex flex-col lg:flex-row justify-between items-center gap-4">
+        <div class="flex gap-4 w-full lg:w-auto items-center">
+          <div class="password-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+              <path fill-rule="evenodd"
+                d="M15.75 1.5a6.75 6.75 0 0 0-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 0 0-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 0 0 .75-.75v-1.5h1.5A.75.75 0 0 0 9 19.5V18h1.5a.75.75 0 0 0 .53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1 0 15.75 1.5Zm0 3a.75.75 0 0 0 0 1.5A2.25 2.25 0 0 1 18 8.25a.75.75 0 0 0 1.5 0 3.75 3.75 0 0 0-3.75-3.75Z"
+                clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="password-info">
+            <h4>{{ secret.title || 'Password senza titolo' }}</h4>
+            @if (secret.username) {
+            <span class="username">{{ secret.username }}</span>
+            }
+          </div>
+        </div>
+        <div class="password-actions flex !gap-4">
+          <button class="btn-icon" title="Copia password" (click)="copyPasswordToClipboard(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+          <button class="btn-icon" title="Mostra password" (click)="viewPassword(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+          @if (canEditSecret(secret)) {
+          <button class="btn-icon" title="Modifica" (click)="editPassword(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+          <button class="btn-icon" title="Sposta in cartella" (click)="moveToFolder(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              <path d="M12 11v6m-3-3h6" />
+            </svg>
+          </button>
+          }
+          @if (canEditSecret(secret)) {
+          <button class="btn-icon" title="Condividi con utente" (click)="shareToUser(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+          </button>
+          <button class="btn-icon" title="Condividi con gruppo" (click)="shareToGroup(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </button>
+          <button class="btn-icon" title="Gestisci condivisioni" (click)="manageShares(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+          </button>
+          <button class="btn-icon danger" title="Elimina" (click)="deletePassword(secret)">
+            <svg class="!size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    } @else if(secrets.value()?.length === 0) {
+    <div class="empty-passwords">
+      <div class="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      </div>
+      <h4>Nessuna password salvata</h4>
+      <p>Aggiungi la tua prima password per iniziare a utilizzare il vault sicuro</p>
+      <button class="btn-primary-sm" (click)="addPassword()">
+        <span class="icon">+</span>
+        Aggiungi Prima Password
+      </button>
+    </div>
+    }
+  </div>
+</div>

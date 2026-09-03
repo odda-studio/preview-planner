@@ -1,0 +1,21 @@
+<ng-container>
+  @if (render) {
+  <app-calendar-month-view [calendarId]="id()" [items]="items() ?? []" [title]="title() ?? ''"
+    [monthSelectorEnabled]="monthSelectorEnabled()" [month]="month()" [year]="year()"
+    [markAsDisabled]="markAsDisabled()" [isHoliday]="isHoliday()" (contextMenu)="contextMenu.emit($event)"
+    (dbClicked)="dbClicked.emit($event)" (selectionChange)="selectionChange.emit($event)"
+    (dayClicked)="dayClicked.emit($event)">
+    <ng-container title>
+      <ng-content select="[title]"></ng-content>
+    </ng-container>
+
+
+    @for (template of templateList; track $index) {
+    <ng-template [calendarEventTemplate]="template.calendarEventTemplate" let-value let-item="item">
+      <ng-container *ngTemplateOutlet="template.template;context: {$implicit:value, item}"></ng-container>
+    </ng-template>
+    }
+
+  </app-calendar-month-view>
+  }
+</ng-container>

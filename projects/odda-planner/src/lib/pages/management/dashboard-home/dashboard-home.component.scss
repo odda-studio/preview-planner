@@ -1,0 +1,25 @@
+// Tutti gli stili sono gestiti con Tailwind CSS direttamente nel template HTML
+
+// Stili per la scrollbar personalizzata
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #404040 #222;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #222;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #404040;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+}

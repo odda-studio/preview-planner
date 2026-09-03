@@ -1,0 +1,109 @@
+<div class="flex flex-col h-full overflow-hidden gap-4 p-4">
+  <!-- Titolo e pulsante import -->
+  <div class="flex justify-between items-center w-full">
+    <h1 class="text-xl font-semibold text-gray-900">Costi Dipendenti</h1>
+
+    <div class="flex gap-2">
+      <input #fileUploader type="file" accept=".csv,.xlsx,.xls" class="hidden" (change)="updateEmployeesCosts($event)">
+      <button
+        (click)="fileUploader.click()"
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs transition-all duration-200 flex items-center gap-1"
+        title="Importa costi dipendenti">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+          <path fill-rule="evenodd"
+            d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 1 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z"
+            clip-rule="evenodd" />
+        </svg>
+        <span class="hidden sm:inline">Importa costi</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtri -->
+  <div class="flex items-center gap-3 flex-wrap">
+    <div class="flex items-center gap-2">
+      <label class="text-sm text-gray-700">Mese</label>
+      <button [matMenuTriggerFor]="monthMenu"
+        class="px-2 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors flex items-center gap-2">
+        {{ selectedMonthsLabel() }}
+      </button>
+      <mat-menu #monthMenu="matMenu" (click)="$event.stopImmediatePropagation()">
+        <div class="flex flex-col">
+          <div class="border-b px-2 py-2 text-sm text-gray-500">Mese</div>
+          @for (m of monthOptions; track m.value) {
+          <mat-checkbox [checked]="isMonthSelected(m.value)" (change)="toggleMonth(m.value)"
+            (click)="$event.stopImmediatePropagation()">
+            {{ m.label }}
+          </mat-checkbox>
+          }
+        </div>
+      </mat-menu>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <label for="yearFilter" class="text-sm text-gray-700">Anno</label>
+      <select id="yearFilter"
+        class="px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)">
+        @for (y of yearOptions; track y.value) {
+        <option [value]="y.value">{{ y.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="ml-auto px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-700 flex items-center gap-2">
+      <span class="font-medium">Totale costo lordo:</span>
+      <span class="font-semibold text-gray-900">{{ totalGrossCosts() | currency:'EUR':'symbol':'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Tabella -->
+  <div class="overflow-x-auto overflow-y-auto shadow-md rounded-lg flex-1">
+    <table class="w-full text-sm text-left text-gray-700">
+      <thead class="text-xs uppercase bg-black text-white sticky top-0">
+        <tr>
+          <th class="px-4 py-3 w-8"></th>
+          <th class="px-4 py-3">Nominativo</th>
+          <th class="px-4 py-3">Codice Fiscale</th>
+          <th class="px-4 py-3">Mesi</th>
+          <th class="px-4 py-3 text-right">Totale Costo Lordo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (data.isLoading()) {
+        <tr>
+          <td colspan="5" class="px-4 py-8 text-center text-gray-500 italic">Caricamento...</td>
+        </tr>
+        } @else if (groups().length === 0) {
+        <tr>
+          <td colspan="5" class="px-4 py-8 text-center text-gray-500 italic">Nessun dato disponibile</td>
+        </tr>
+        } @else {
+        @for (group of groups(); track groupKey(group)) {
+        <tr class="border-b bg-white hover:bg-blue-50 transition-colors cursor-pointer" (click)="toggleExpand(group)">
+          <td class="px-4 py-3">
+            <svg class="w-4 h-4 transition-transform duration-150" [class.rotate-90]="isExpanded(group)" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </td>
+          <td class="px-4 py-3 font-medium text-gray-900">{{ group.name }} {{ group.surname }}</td>
+          <td class="px-4 py-3">{{ group.fiscalCode }}</td>
+          <td class="px-4 py-3">{{ group.records?.length || 0 }}</td>
+          <td class="px-4 py-3 text-right font-semibold">{{ group.totals?.grossCosts ?? 0 | currency:'EUR':'symbol':'1.2-2' }}</td>
+        </tr>
+        @if (isExpanded(group)) {
+        @for (record of group.records; track record.id) {
+        <tr class="border-b bg-gray-50 text-xs text-gray-600">
+          <td class="px-4 py-2"></td>
+          <td class="px-4 py-2" colspan="3">{{ monthLabel(record.month ?? 1 - 1) }} {{ record.year }}</td>
+          <td class="px-4 py-2 text-right">{{ record.grossCosts ?? 0 | currency:'EUR':'symbol':'1.2-2' }}</td>
+        </tr>
+        }
+        }
+        }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

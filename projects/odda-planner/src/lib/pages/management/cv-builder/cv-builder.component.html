@@ -1,0 +1,735 @@
+<div class="gdoc-bg">
+
+  <!-- ══ Toolbar ════════════════════════════════════════════════════════════ -->
+  <div class="cv-toolbar">
+    <span class="toolbar-title">CV Builder</span>
+    <span class="toolbar-sep"></span>
+    <button class="btn-toolbar-icon" (click)="undo()" [disabled]="!canUndo()" title="Annulla (Ctrl+Z)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 10h10a8 8 0 018 8v2M3 10l6 6M3 10l6-6" />
+      </svg>
+    </button>
+    <button class="btn-toolbar-icon" (click)="redo()" [disabled]="!canRedo()" title="Ripristina (Ctrl+Y)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 10H11a8 8 0 00-8 8v2M21 10l-6 6M21 10l-6-6" />
+      </svg>
+    </button>
+    <span class="toolbar-sep"></span>
+    <button class="btn-toolbar-sec" [disabled]="talentNotFound()" (click)="addCustomSection()">
+      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Aggiungi sezione
+    </button>
+    <button class="btn-toolbar-prim" [disabled]="talentNotFound()" (click)="saveChanges()" [disabled]="!canUndo()">
+      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      Salva
+    </button>
+
+    <button class="btn-toolbar-sec" [disabled]="talentNotFound()" (click)="reload()">
+      Ricarica
+    </button>
+    <button class="btn-toolbar-sec" [disabled]="talentNotFound()" (click)="regeneratePdf()">
+      Rigenera PDF
+    </button>
+
+    <button class="btn-toolbar-sec" [disabled]="talentNotFound()" (click)="forceNewLoading()">
+      {{getCvsResponse.value()?.cvs?.length ? 'Rigenera CV' : 'Genera CV'}}
+    </button>
+
+    <div class="cv-version-wrap">
+      <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="cv-version-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <select [(ngModel)]="currentVersion" (ngModelChange)="selectCv($event)" class="cv-version-select"
+        [disabled]="talentNotFound()">
+        @for (item of getCvsResponse.value()?.cvs; track item.id) {
+        <option [value]="item.id" [selected]="item.id === currentCv()?.cv?.id">
+          v. {{ item.version }} {{item.versionName ?? ''}}
+        </option>
+        }
+      </select>
+    </div>
+
+    <button class="btn-toolbar-icon" title="Clona versione" (click)="cloneCurrentVersion()" [disabled]="!currentCv()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    </button>
+    <button class="btn-toolbar-icon btn-toolbar-icon--verify" title="Imposta come verificato"
+      (click)="verifyCurrentVersion()" [disabled]="!currentCv()" [class.active]="currentCv()?.cv?.verified">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    </button>
+    <button class="btn-toolbar-icon btn-toolbar-icon--danger" title="Elimina versione" (click)="deleteCurrentVersion()"
+      [disabled]="!currentCv()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+    </button>
+
+
+    <!-- ── AI Suggestions dropdown ───────────────────────────────────────── -->
+    @if (aiSuggestions().length > 0) {
+    <div class="ai-suggestions-wrap">
+      <button class="btn-toolbar-icon btn-ai-suggestions" [class.active]="aiSuggestionsOpen()"
+        (click)="toggleAiSuggestions()" title="Suggerimenti AI">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+        </svg>
+        <span class="ai-badge">{{pendingAiSuggestionsCount()}}</span>
+      </button>
+
+      @if (aiSuggestionsOpen()) {
+      <div class="ai-backdrop" (click)="toggleAiSuggestions()"></div>
+      <div class="ai-suggestions-panel">
+        <div class="ai-panel-header">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="ai-panel-icon">
+            <path
+              d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+          </svg>
+          Suggerimenti AI
+        </div>
+        <div class="ai-panel-list">
+          @for (s of aiSuggestions(); track s.id) {
+          <div class="ai-suggestion-item border-b-2"
+            [class.ai-suggestion-applied]="isAiApplied(s.section!, s.identifier!)"
+            [class.ai-suggestion-confirm]="s.oldValue === s.newValue">
+            <div class="ai-suggestion-meta">
+              <span class="ai-suggestion-label">{{s.title ?? fieldLabelFor(s.section!)}}</span>
+              @if (s.oldValue === s.newValue) {
+              <span class="ai-confirm-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+                Confermato dall'AI
+              </span>
+              } @else if (isAiApplied(s.section!, s.identifier!)) {
+              <span class="ai-applied-badge">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+                Applicato
+              </span>
+              }
+            </div>
+            @if (s.oldValue !== s.newValue) {
+            <div class="ai-suggestion-values">
+              <span class="ai-val-old">{{truncate(s.oldValue ?? '', 50)}}</span>
+              <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+              <span class="ai-val-new">{{truncate(s.newValue ?? '', 50)}}</span>
+            </div>
+            @if (!isAiApplied(s.section!, s.identifier!)) {
+            <button class="ai-apply-btn" (click)="applyAiSuggestion(s)">Applica</button>
+            }
+            } @else {
+            <div class="ai-confirm-value">{{truncate(s.newValue ?? '', 60)}}</div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <span class="toolbar-sep"></span>
+    <span class="btn-toolbar-sec text-xs"> Aggiornato al: {{lastUpdate() | date : 'dd/MM/yy - HH:mm'}}</span>
+    <button class="btn-toolbar-icon btn-a11y-toggle" (click)="updateContrast()" [class.active]="highContrast()"
+      title="Alto contrasto editor">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" stroke-width="2" />
+        <path stroke-width="2" d="M12 3a9 9 0 010 18V3z" fill="currentColor" stroke="none" />
+      </svg>
+    </button>
+
+    <button class="btn-toolbar-sec preview-toggle-btn" (click)="togglePreview()"
+      [title]="previewOpen() ? 'Chiudi anteprima' : 'Apri anteprima'">
+      @if (previewOpen()) {
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+      </svg>
+      Chiudi anteprima
+      } @else {
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+      </svg>
+      Anteprima
+      }
+    </button>
+  </div>
+
+  @if(currentCv()?.cv?.status == 'Pending' || currentCv()?.cv?.status == 'Processing') {
+  <div class="cv-pending h-[calc(100vh-92px)]">
+    <div class="cp-icon">
+      <svg width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" stroke-width="1.5" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 7v5l3 3" />
+      </svg>
+    </div>
+    <h2 class="cp-title">CV in elaborazione</h2>
+    <p class="cp-desc">
+      Il CV è attualmente in fase di elaborazione.<br />
+      Attendi il completamento o seleziona un'altra versione salvata, se disponibile.
+    </p>
+    <a class="cp-back" (click)="getCvsResponse.reload()">Aggiorna</a>
+  </div>
+  }
+  @else if (talentNotFound()) {
+
+  <div class="talent-not-found h-[calc(100vh-92px)]">
+    <div class="tnf-icon">
+      <svg width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" stroke-width="1.5" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 20l-3-3" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 8v3m0 3h.01" />
+      </svg>
+    </div>
+    <h2 class="tnf-title">Talent non trovato</h2>
+    <p class="tnf-desc">
+      Nessun profilo corrisponde all'ID richiesto.<br />
+      Verifica che l'ID sia corretto.
+    </p>
+    <a class="tnf-back" routerLink="/management" [queryParams]="{ link: 'Talents' }">← Torna alla lista talent</a>
+  </div>
+
+  } @else {
+  <!-- ══ Document ═══════════════════════════════════════════════════════════ -->
+  <div class="cv-content-wrapper">
+    <!-- Editor Column -->
+    <div class="cv-outer" [class.preview-closed]="!previewOpen()">
+      <div class="cv-editor-area">
+        <div class="cv-page overflow-auto">
+
+          <!-- ── Sidebar sinistra ───────────────────────────────────────────── -->
+          <aside class="cv-sidebar" [class.high-contrast]="highContrast()">
+
+            <!-- Logo aziendale -->
+            <div class="sidebar-logo-wrap">
+              <div class="logo-area">
+                @if (logoUrl()) {
+                <img [src]="logoUrl()" alt="Logo azienda" />
+                <button class="logo-remove" (click)="removeLogo()">Rimuovi</button>
+                } @else {
+                <label class="logo-upload" for="cvLogoInput">
+                  <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 16M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Carica logo
+                  <input id="cvLogoInput" type="file" accept="image/*" style="display:none"
+                    (change)="onLogoSelected($event)" />
+                </label>
+                }
+              </div>
+            </div>
+
+            <!-- *HIGHLIGHTS -->
+            <div>
+              <div class="sb-title">
+                *HIGHLIGHTS
+                <div class="flex justify-end w-full block-actions">
+                  <button class="btn-add !w-auto" (click)="addHighlight()">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+              <div cdkDropList (cdkDropListDropped)="dropHighlight($event)">
+                @for (h of highlights(); track h.id) {
+                <div cdkDrag>
+                  <div class="hl-row" [class.pending-delete]="pendingDeletedIds().has(h.id)"
+                    (focusin)="focusedChangeKey.set(h.id)">
+                    <div class="drag-handle-small" cdkDragHandle>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="size-4 rotate-45">
+                        <path fill-rule="evenodd"
+                          d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+                          clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <input class="hl-skill inline-field w-[140px]" type="text" [value]="h.skill" placeholder="Skill"
+                      [class.ai-value]="isAiSuggestedValue('highlight.skill', h.id, h.skill)"
+                      (blur)="updateHighlight(h.id, 'skill', $any($event.target).value)" />
+                    <input class="hl-years-input inline-field" type="number" [value]="h.years" placeholder="0" min="0"
+                      max="50" [class.ai-value]="isAiSuggestedValue('highlight.years', h.id, h.years)"
+                      (blur)="updateHighlight(h.id, 'years', $any($event.target).valueAsNumber)" />
+                    <button class="inline-del-btn" (click)="removeHighlight(h.id)" title="Rimuovi">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                } @empty {
+                <p style="font-size:10px;color:#bbb;font-style:italic;">Nessuna skill</p>
+                }
+
+              </div>
+            </div>
+
+            <!-- *OTHER -->
+            <div>
+              <div class="sb-title">
+                *OTHER
+                <div class="flex justify-end w-full block-actions  !mt-4">
+                  <button class="btn-add !w-auto" (click)="addOtherSkill()">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+              <div cdkDropList (cdkDropListDropped)="dropOtherSkill($event)">
+                @for (s of otherSkills(); track s.id) {
+                <div cdkDrag>
+                  <div class="other-skill-row" [class.pending-delete]="pendingDeletedIds().has(s.id)"
+                    (focusin)="focusedChangeKey.set(s.id)">
+                    <div class="drag-handle-small" cdkDragHandle>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="size-4 rotate-45">
+                        <path fill-rule="evenodd"
+                          d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+                          clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <input class="osk-input inline-field w-[120px]" type="text" [value]="s.name"
+                      placeholder="Es. Docker" [class.ai-value]="isAiSuggestedValue('otherSkill.name', s.id, s.name)"
+                      (blur)="updateOtherSkill(s.id, $any($event.target).value)" />
+                    <button class="inline-del-btn" (click)="removeOtherSkill(s.id)" title="Rimuovi">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                } @empty {
+                <p style="font-size:10px;color:#bbb;font-style:italic;">Nessuna tech aggiunta</p>
+                }
+              </div>
+
+
+            </div>
+
+            <!-- *LANGUAGES -->
+            <div>
+              <div class="sb-title">
+                *LANGUAGES
+                <div class="flex justify-end w-full block-actions !mt-4">
+                  <button class="btn-add !w-auto" (click)="addLanguage()">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+              <div cdkDropList (cdkDropListDropped)="dropLanguage($event)">
+                @for (lang of languages(); track lang.id) {
+                <div cdkDrag>
+                  <div class="hl-row" [class.pending-delete]="pendingDeletedIds().has(lang.id)"
+                    (focusin)="focusedChangeKey.set(lang.id)">
+                    <div class="drag-handle-small" cdkDragHandle>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="size-4 rotate-45">
+                        <path fill-rule="evenodd"
+                          d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+                          clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <input class="hl-skill inline-field w-[120px]" type="text" [value]="lang.language"
+                      placeholder="Lingua"
+                      [class.ai-value]="isAiSuggestedValue('language.language', lang.id, lang.language)"
+                      (blur)="updateLanguage(lang.id, 'language', $any($event.target).value)" />
+                    <input class="hl-skill inline-field" type="text" [value]="lang.level" placeholder="Livello"
+                      style="width:60px;" [class.ai-value]="isAiSuggestedValue('language.level', lang.id, lang.level)"
+                      (blur)="updateLanguage(lang.id, 'level', $any($event.target).value)" />
+                    <button class="inline-del-btn" (click)="removeLanguage(lang.id)" title="Rimuovi">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                } @empty {
+                <p style="font-size:10px;color:#bbb;font-style:italic;">Nessuna lingua</p>
+                }
+              </div>
+
+
+            </div>
+
+            <!-- Sezioni custom sidebar -->
+            @for (section of customSections(); track section.id) {
+            <div>
+              <div class="sb-title">
+                @if (section.editing) {
+                <input type="text" [formControl]="$any(getCustomSectionForm(section.id).get('title'))"
+                  style="outline:none;border-bottom:1px dashed #26c6da;color:#26c6da;font-size:11px;font-weight:800;letter-spacing:1px;background:transparent;border-top:none;border-left:none;border-right:none;padding:2px;" />
+                } @else {
+                *{{ section.title | uppercase }}
+                }
+                <div style="display:flex;gap:4px;">
+                  @if (!section.editing) {
+                  <button class="custom-section-edit-btn" (click)="editCustomSection(section.id)"
+                    title="Modifica sezione">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  } @else {
+                  <button class="sb-add-btn" style="font-size:11px;color:#188038;"
+                    (click)="confirmCustomSection(section.id)"
+                    [disabled]="getCustomSectionForm(section.id).invalid">✓</button>
+                  <button class="sb-add-btn" style="font-size:11px;color:#c5221f;"
+                    (click)="removeCustomSection(section.id)">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  }
+                </div>
+              </div>
+
+              @if (section.editing) {
+              <!-- Form di editing -->
+              <div [formGroup]="getCustomSectionForm(section.id)">
+                <div style="margin-bottom:8px;">
+                  <input type="text" formControlName="title" placeholder="Titolo sezione"
+                    style="width:100%;font-size:11px;font-weight:800;padding:4px;border:1px solid #26c6da;border-radius:2px;font-family:'Epilogue',sans-serif;margin-bottom:4px;" />
+                  <input type="text" formControlName="level" placeholder="Level generale (es. Advanced)"
+                    style="width:100%;font-size:10px;padding:4px;border:1px solid #ddd;border-radius:2px;font-family:'Epilogue',sans-serif;" />
+                </div>
+
+                <!-- Lista items -->
+                <div formArrayName="content">
+                  @for (ctrl of getCustomSectionContentArray(section.id).controls; track $index) {
+                  <div [formGroupName]="$index"
+                    style="background:#f5f5f5;padding:6px;margin-bottom:4px;border-radius:3px;">
+                    <div style="display:flex;gap:4px;margin-bottom:4px;">
+                      <input type="text" formControlName="label" placeholder="Label (es. Italian)"
+                        style="flex:1;font-size:10px;padding:3px;border:1px solid #ddd;border-radius:2px;font-family:'Epilogue',sans-serif;" />
+                      <input type="text" formControlName="level" placeholder="Level"
+                        style="width:80px;font-size:10px;padding:3px;border:1px solid #ddd;border-radius:2px;font-family:'Epilogue',sans-serif;" />
+                      <button type="button" (click)="removeCustomSectionItem(section.id, $index)"
+                        style="background:#c5221f;color:white;border:none;border-radius:2px;padding:3px 5px;font-size:10px;cursor:pointer;display:flex;align-items:center;">
+                        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  }
+                </div>
+
+                <button type="button" (click)="addCustomSectionItem(section.id)"
+                  style="background:#e8f5e9;color:#188038;border:1px solid #188038;border-radius:3px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;font-family:'Epilogue',sans-serif;width:100%;margin-top:4px;">
+                  + Aggiungi item
+                </button>
+              </div>
+              } @else {
+              <!-- Vista confermata -->
+              @if (section.level) {
+              <p style="font-size:10px;color:#888;margin-bottom:4px;">{{ section.level }}</p>
+              }
+              @for (item of section.content; track $index) {
+              <p class="cv-text" style="font-size:12px;margin-bottom:2px;">
+                {{ item.label }}@if (item.level) {<span style="color:#888;"> ({{ item.level }})</span>}
+              </p>
+              }
+              }
+            </div>
+            }
+
+          </aside><!-- /sidebar -->
+
+          <!-- ── Contenuto principale ───────────────────────────────────────── -->
+          <div class="cv-main" [class.high-contrast]="highContrast()">
+
+            <!-- Header: nome, titolo, SENIOR | X YEARS, anno nascita -->
+            <div (focusin)="focusedChangeKey.set('basicInfo')">
+              <input type="text" class="cv-name inline-field" [value]="basicInfo().name" placeholder="Nome Cognome"
+                [class.ai-value]="isAiSuggestedValue('basicInfo.name', id()!, basicInfo().name)"
+                (blur)="updateBasicInfo('name', $any($event.target).value)" />
+              <input type="text" class="cv-jobtitle inline-field" [value]="basicInfo().title"
+                placeholder="Titolo professionale"
+                [class.ai-value]="isAiSuggestedValue('basicInfo.title', id()!, basicInfo().title)"
+                (blur)="updateBasicInfo('title', $any($event.target).value)" />
+              <div class="cv-meta">
+                <input type="text" class="inline-field !placeholder-black placeholder-bold"
+                  [value]="basicInfo().seniorityLabel" placeholder="SENIOR" style="width:80px;"
+                  [class.ai-value]="isAiSuggestedValue('basicInfo.seniorityLabel', id()!, basicInfo().seniorityLabel)"
+                  (blur)="updateBasicInfo('seniorityLabel', $any($event.target).value)" />
+                &nbsp;|&nbsp;
+                <input type="number" class="inline-field" [value]="basicInfo().yearsExperience ?? ''" placeholder="0"
+                  style="width:36px;"
+                  [class.ai-value]="isAiSuggestedValue('basicInfo.yearsExperience', id()!, basicInfo().yearsExperience)"
+                  (blur)="updateBasicInfo('yearsExperience', +$any($event.target).value || null)" />
+                <span class="placeholder-black"
+                  style="font-size:11px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase; ">YEARS</span>
+              </div>
+              <div class="cv-birthyear">
+                Year of birth
+                <input type="number" class="inline-field !text-black !font-md" [value]="basicInfo().birthYear ?? ''"
+                  placeholder="1980" (blur)="updateBasicInfo('birthYear', +$any($event.target).value || null)" />
+              </div>
+            </div>
+
+            <!-- Overview (nessun titolo di sezione, testo libero) -->
+            <div style="position:relative;">
+              <span class="overview-state-icon">
+                @if (overview().editing) {
+                <svg width="13" height="13" fill="none" stroke="#26c6da" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                } @else {
+                <svg width="13" height="13" fill="none" stroke="#188038" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                }
+              </span>
+              <textarea class="cv-text inline-contenteditable overview-editable" data-placeholder="Overview..."
+                [rows]="(overview().content.length / 80) + 3"
+                [class.ai-value]="isAiSuggestedValue('overview.content', id()!, overview().content)"
+                (focus)="setOverviewEditingStatus(true); focusedChangeKey.set('overview')"
+                (blur)="confirmOverview($any($event.target).value)">{{ overview().content }}</textarea>
+            </div>
+
+            <!-- *EXPERIENCE -->
+            <div>
+              <div class="cv-section-title">
+                *EXPERIENCE
+                <div class="block-actions" style="margin-top:0;">
+                  <button class="btn-add" (click)="addExperience()">
+                    <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+
+              <div cdkDropList (cdkDropListDropped)="dropExperience($event)">
+                @for (exp of experiences(); track exp.id) {
+                <div class="exp-block" [class.pending-delete]="pendingDeletedIds().has(exp.id)"
+                  (focusin)="focusedChangeKey.set(exp.id)" cdkDrag>
+                  <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <div class="exp-controls flex flex-col">
+                      <div class="drag-handle" cdkDragHandle>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                          class="size-6 rotate-45">
+                          <path fill-rule="evenodd"
+                            d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+                            clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                      <button class="inline-del-btn absolute right-0 top-0" (click)="removeExperience(exp.id)"
+                        title="Rimuovi" style="margin-top:4px;">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <input class="exp-period inline-field" type="text" [value]="exp.period"
+                        placeholder="Periodo es. 2022–IN PROGRESS"
+                        [class.ai-value]="isAiSuggestedValue('experience.period', exp.id, exp.period)"
+                        (blur)="updateExperience(exp.id, 'period', $any($event.target).value)" />
+                      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                        <input class="exp-title inline-field" type="text" [value]="exp.company" placeholder="Azienda"
+                          [class.ai-value]="isAiSuggestedValue('experience.company', exp.id, exp.company)"
+                          (blur)="updateExperience(exp.id, 'company', $any($event.target).value)" />
+                        <span style="color:#ccc;">–</span>
+                        <input class="exp-title inline-field" type="text" [value]="exp.role" placeholder="Ruolo"
+                          [class.ai-value]="isAiSuggestedValue('experience.role', exp.id, exp.role)"
+                          (blur)="updateExperience(exp.id, 'role', $any($event.target).value)" />
+                      </div>
+                      <input class="exp-tech inline-field w-full" type="text" [value]="exp.technologies"
+                        placeholder="Tecnologie..."
+                        [class.ai-value]="isAiSuggestedValue('experience.technologies', exp.id, exp.technologies)"
+                        (blur)="updateExperience(exp.id, 'technologies', $any($event.target).value)" />
+                      <textarea class="cv-text inline-contenteditable" contenteditable="true"
+                        data-placeholder="Descrizione del progetto..." [rows]="exp.description.length / 60 + 1"
+                        (focus)="currentEditingExperienceId.set(exp.id); currentEditingExperienceValue.set(exp.description)"
+                        (input)="setCurrentEditingExperienceValue($any($event.target).value)"
+                        (blur)="updateExperience(exp.id, 'description', currentEditingExperienceValue())">{{
+                        exp.description
+                        }}</textarea>
+                    </div>
+                  </div>
+                </div>
+                @if (!$last) {
+                <hr class="exp-divider" /> }
+                } @empty {
+                <p style="font-size:12px;color:#bbb;font-style:italic;">Nessuna esperienza — usa "Aggiungi".</p>
+                }
+              </div>
+            </div>
+
+            <!-- *TRAINING & CERTIFICATES -->
+            <div>
+              <div class="cv-section-title">
+                *TRAINING & CERTIFICATES
+                <div class="block-actions" style="margin-top:0;">
+                  <button class="btn-add" (click)="addTraining()">
+                    <svg width="9" height="9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+
+              <div cdkDropList (cdkDropListDropped)="dropTraining($event)">
+                @for (training of trainingAndCertificates(); track training.id) {
+                <div class="exp-block" [class.pending-delete]="pendingDeletedIds().has(training.id)"
+                  (focusin)="focusedChangeKey.set(training.id)" cdkDrag>
+                  <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <div class="exp-controls flex flex-col">
+                      <div class="drag-handle" cdkDragHandle>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                          class="size-6 rotate-45">
+                          <path fill-rule="evenodd"
+                            d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-3.97 3.97a.75.75 0 1 1-1.06-1.06l3.97-3.97h-2.69a.75.75 0 0 1-.75-.75Zm-12 0A.75.75 0 0 1 3.75 3h4.5a.75.75 0 0 1 0 1.5H5.56l3.97 3.97a.75.75 0 0 1-1.06 1.06L4.5 5.56v2.69a.75.75 0 0 1-1.5 0v-4.5Zm11.47 11.78a.75.75 0 1 1 1.06-1.06l3.97 3.97v-2.69a.75.75 0 0 1 1.5 0v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1 0-1.5h2.69l-3.97-3.97Zm-4.94-1.06a.75.75 0 0 1 0 1.06L5.56 19.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 1 1.5 0v2.69l3.97-3.97a.75.75 0 0 1 1.06 0Z"
+                            clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                      <button class="inline-del-btn" (click)="removeTraining(training.id)" title="Rimuovi"
+                        style="margin-top:4px;">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                        <input class="exp-title inline-field" type="text" [value]="training.title"
+                          placeholder="Titolo certificazione/corso"
+                          (blur)="updateTraining(training.id, 'title', $any($event.target).value)" />
+                        <span style="color:#ccc;">–</span>
+                        <input class="inline-field" type="text" [value]="training.year" placeholder="Anno"
+                          style="width:60px;" (blur)="updateTraining(training.id, 'year', $any($event.target).value)" />
+                      </div>
+                      <input class="exp-tech inline-field" type="text" [value]="training.issuer"
+                        placeholder="Ente/Organizzazione"
+                        (blur)="updateTraining(training.id, 'issuer', $any($event.target).value)" />
+                      <select class="inline-field inline-select" [value]="training.type ?? ''"
+                        (blur)="updateTraining(training.id, 'type', $any($event.target).value)"
+                        (change)="updateTraining(training.id, 'type', $any($event.target).value)">
+                        <option value="">Tipo...</option>
+                        <option value="Training">Training</option>
+                        <option value="Certificate">Certificate</option>
+                      </select>
+                      <textarea class="cv-text inline-contenteditable" contenteditable="true"
+                        data-placeholder="Descrizione..."
+                        (focus)="currentEditingTrainingId.set(training.id); currentEditingTrainingValue.set(training.description)"
+                        (input)="currentEditingTrainingValue.set($any($event.target).value)"
+                        (blur)="updateTraining(training.id, 'description', currentEditingTrainingValue())">{{
+                        training.description }}</textarea>
+                    </div>
+                  </div>
+                </div>
+                @if (!$last) {
+                <hr class="exp-divider" /> }
+                } @empty {
+                <p style="font-size:12px;color:#bbb;font-style:italic;">Nessun training o certificazione — usa
+                  "Aggiungi".</p>
+                }
+              </div>
+            </div>
+
+          </div><!-- /cv-main -->
+        </div><!-- /cv-page -->
+        @if (focusedChanges().length) {
+        <div class="changes-side-panel absolute top-[29px] left-[51%] margin-left-10">
+          <div class="changes-panel-title">Storico modifiche</div>
+          <ng-container *ngTemplateOutlet="changeTpl; context: { entries: focusedChanges() }"></ng-container>
+        </div>
+        }
+      </div><!-- /cv-editor-area -->
+    </div><!-- /cv-outer -->
+
+    <!-- PDF Viewer Column -->
+    <div class="cv-pdf-preview" [class.collapsed]="!previewOpen()">
+      <div class="pdf-preview-header">
+        <div class="preview-tabs">
+          <button class="preview-tab" [class.active]="previewTab() === 'cv'" (click)="previewTab.set('cv')">CV
+            Originale</button>
+          <button class="preview-tab" [class.active]="previewTab() === 'result'"
+            (click)="previewTab.set('result')">Anteprima Risultato</button>
+        </div>
+      </div>
+      <div class="pdf-preview-content">
+        @if(originalVersionPdfBlob() && previewTab() === 'cv') {
+
+        <lib-pdf-viewer class="absolute inset-0 h-full w-full" [visible]="previewTab() === 'cv'"
+          [pdfUrl]="originalVersionPdfBlob()"></lib-pdf-viewer>
+        }
+        @if(internalVersionPdfUrlBlob() && previewTab() === 'result') {
+        <lib-pdf-viewer class="absolute inset-0 h-full w-full" [visible]="previewTab() === 'result'"
+          [pdfUrl]="internalVersionPdfUrlBlob()"></lib-pdf-viewer>
+        }
+
+      </div>
+    </div>
+    <!-- Change history template -->
+    <ng-template #changeTpl let-entries="entries">
+      <div class="change-menu" (click)="$event.stopPropagation()">
+        @for (c of entries; track $index) {
+        <div class="change-entry">
+          <div class="change-avatar-wrap">
+            @if (c.user?.imageUrl) {
+            <img class="change-avatar" [src]="c.user.imageUrl" [alt]="c.user?.fullName" />
+            } @else {
+            <div class="change-avatar-fallback">{{ userInitials(c.user?.fullName || '?') }}</div>
+            }
+          </div>
+          <div class="change-entry-body">
+            <div class="change-meta">
+              <span class="change-user">{{ c.user?.fullName || 'Tu' }}</span>
+              <span class="change-time">{{ c.timestamp | date:'dd/MM HH:mm' }}</span>
+            </div>
+            <div class="change-field-label">{{ fieldLabelFor(c.section) }}</div>
+            <div class="change-diff">
+              @let changed = getDiff(c.oldValue, c.newValue);
+              <span class="diff-del">{{ truncate(changed.removed) || '(vuoto)' }}</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                style="flex-shrink:0;color:#999;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <span class="diff-ins">{{ truncate(changed.added) || '(vuoto)' }}</span>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </ng-template>
+  </div><!-- /cv-content-wrapper -->
+  }

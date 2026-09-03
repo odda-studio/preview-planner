@@ -1,0 +1,160 @@
+@let _data = data();
+@if(_data){
+
+<app-export class="!hidden" #fullExporter></app-export>
+
+<lib-entity-manager #entityManager (showUpdateForm)="showUpdateForm($event)" [(filters)]="currentFilters"
+  [(filtersNode)]="filtersNode" [(sorting)]="sorting" [pageSize]="50" (showCreateForm)="show.set(true)"
+  (showFilters)="onShowFilters()" (showDeleteForm)="onDeleteForm($event)" [allowSelection]="allowSelection()"
+  [tableName]="_data.tableName" [(selectedRowsData)]="selectedRowsData" [title]="header()"
+  [createFormName]="_data.createForm" (entityReady)="entityReady($event)" (onSubmit)="handleOnSubmit($event)"
+  [updateFormName]="_data.updateForm" [entityName]="_data.entityName">
+  @if (_data.entityName === 'employeeCost') {
+     <ng-template #title>
+    <div class="flex justify-between items-center w-full">
+      <div>
+        {{header()}}
+      </div>
+      <div class="flex gap-2">
+        <!-- Pulsante Conferma -->
+
+        <input #fileUploader type="file" accept=".csv,.xlsx,.xls" class="hidden" (change)="updateEmployeesCosts($event)">
+        <button
+          (click)="fileUploader.click()"
+          class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs transition-all duration-200 flex items-center gap-1"
+          title="Importa costi dipendenti">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd"
+              d="M11.47 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 1 1-1.06 1.06l-3.22-3.22V16.5a.75.75 0 0 1-1.5 0V4.81L8.03 8.03a.75.75 0 0 1-1.06-1.06l4.5-4.5ZM3 15.75a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z"
+              clip-rule="evenodd" />
+          </svg>
+          <span class="hidden sm:inline">Importa costi</span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+  }
+  @if (_data.entityName === 'working-day' && timesheet) {
+  <ng-template #title>
+    <div class="flex justify-between items-center w-full">
+      <div>
+        {{header()}}
+        <lib-timesheet-hours-details [showMoreAvailable]="false" [timesheet]="timesheet"></lib-timesheet-hours-details>
+      </div>
+      <div class="flex gap-2">
+        <!-- Pulsante Conferma -->
+
+        <button (click)="openUploadModal()"
+          class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs transition-all duration-200 flex items-center gap-1"
+          title="Carica documenti">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path d="M11.625 16.5a1.875 1.875 0 1 0 0-3.75 1.875 1.875 0 0 0 0 3.75Z" />
+            <path fill-rule="evenodd"
+              d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875Zm6 16.5c.66 0 1.277-.19 1.797-.518l1.048 1.048a.75.75 0 0 0 1.06-1.06l-1.047-1.048A3.375 3.375 0 1 0 11.625 18Z"
+              clip-rule="evenodd" />
+            <path
+              d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
+          </svg>
+          <span class="hidden sm:inline">Mostra documenti</span>
+        </button>
+        <button [disabled]="timesheet.approved" (click)="confirmTimesheet()"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-200 text-white rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+          title="Approva timesheet">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Approva Timesheet</span>
+        </button>
+
+        <!-- Pulsante Rifiuta -->
+        <button (click)="resetTimesheet()"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-200 text-white rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+          title="Rifiuta timesheet">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Rifiuta</span>
+        </button>
+      </div>
+    </div>
+  </ng-template>
+  }
+  @if (_data.entityName === 'timesheet') {
+  <ng-template #title>
+    <div class="flex justify-between items-center w-full">
+      <div>
+        {{header()}}
+      </div>
+      <div class="flex gap-2">
+        @let timesheets = selectedRowsData()?.selectedRows;
+        @if (timesheets?.length) {
+        <button
+          class="px-4 py-2 cursor-pointer items-center bg-black hover:bg-black-300 disabled:bg-green-200 text-white rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+          (click)="exporter.export(timesheets || [])">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+            <path fill-rule="evenodd"
+              d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z"
+              clip-rule="evenodd" />
+          </svg>
+
+          Export
+        </button>
+        <app-export style="display: none" #exporter></app-export>
+        }
+      </div>
+    </div>
+  </ng-template>
+  }
+  @if (_data.entityName === 'invoice') {
+  <ng-template #title>
+    <div class="flex justify-between items-center w-full">
+      <div>
+        {{header()}}
+      </div>
+      <div class="flex gap-2 items-center">
+        <div>
+          Premi il pulsante export per scaricare proforma e timesheet di tutti i clienti visibili nella tabella.
+        </div>
+        <button title="Scarica Proforma e Timesheet per ogni cliente"
+          class="px-4 py-2 cursor-pointer items-center bg-black hover:bg-black-300 disabled:bg-green-200 text-white rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+          (click)="exportAll($any(entityManager.tableComponent()?.rows()))">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+            <path fill-rule="evenodd"
+              d="M12 2.25a.75.75 0 0 1 .75.75v11.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 1 1 1.06-1.06l3.22 3.22V3a.75.75 0 0 1 .75-.75Zm-9 13.5a.75.75 0 0 1 .75.75v2.25a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V16.5a.75.75 0 0 1 1.5 0v2.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V16.5a.75.75 0 0 1 .75-.75Z"
+              clip-rule="evenodd" />
+          </svg>
+
+          Export
+        </button>
+      </div>
+    </div>
+  </ng-template>
+  }
+</lib-entity-manager>
+<lib-right-action-sidenav
+  [title]="(isUpdating() ? (_data.titleUpdatingItem ? _data.titleUpdatingItem(currentRow()) : '') : _data.titleCreatingItem) || ''"
+  [(show)]="show" (showChange)="entityManager.reset()">
+  <div class="p-4">
+    @if (show()) {
+    <ng-container *ngTemplateOutlet="entityManager.formTemplate()"></ng-container>
+    }
+  </div>
+</lib-right-action-sidenav>
+
+@if (showFilterSidenav()){
+<lib-filter-sidenav [(queries)]="queries" [(filterGroups)]="filtersGroup" [filters]="filters"
+  [(selectedQueryId)]="selectedQuery" [(show)]="showFilterSidenav" (filtersApplied)="onFiltersApplied($event)" />
+}
+
+}
+
+<div [class]="isModalOpen() ? 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm' : ''"
+  (click)="isModalOpen() && closeModal()">
+  <div [class]="isModalOpen() ? 'bg-white shadow-2xl w-[90vw] h-[90vh] overflow-auto relative' : ''"
+    (click)="$event.stopPropagation()">
+    
+    <router-outlet (activate)="isModalOpen.set(true)" (deactivate)="isModalOpen.set(false)"></router-outlet>
+  </div>
+</div>

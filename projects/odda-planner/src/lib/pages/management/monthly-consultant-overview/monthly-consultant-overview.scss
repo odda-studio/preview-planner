@@ -1,0 +1,64 @@
+// Stili personalizzati per le righe pagate/non pagate
+.paid-row {
+  background-color: #d1fae5 !important; // Verde chiaro
+  border-left: 4px solid #10b981; // Bordo verde
+  
+  &:hover {
+    background-color: #a7f3d0 !important; // Verde più scuro al hover
+  }
+}
+
+.invoice-received-row {
+  // background-color: #bbb2f0 !important; // Giallo chiaro
+  // border-left: 4px solid #6451dd; // Bordo arancione
+  
+  // &:hover {
+  //   background-color: #bbb2f0 !important; // Giallo più scuro al hover
+  // }
+}
+
+.unpaid-row {
+  
+}
+
+// Stili personalizzati per lo snackbar
+::ng-deep {
+  .success-snackbar {
+    background-color: #22c55e !important;
+    color: white !important;
+    
+    .mat-mdc-snack-bar-label {
+      color: white !important;
+    }
+    
+    .mat-mdc-button {
+      color: white !important;
+    }
+  }
+
+  .error-snackbar {
+    background-color: #ef4444 !important;
+    color: white !important;
+    
+    .mat-mdc-snack-bar-label {
+      color: white !important;
+    }
+    
+    .mat-mdc-button {
+      color: white !important;
+    }
+  }
+
+  .warning-snackbar {
+    background-color: #f59e0b !important;
+    color: white !important;
+    
+    .mat-mdc-snack-bar-label {
+      color: white !important;
+    }
+    
+    .mat-mdc-button {
+      color: white !important;
+    }
+  }
+}

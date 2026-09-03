@@ -1,0 +1,22 @@
+<div>
+  <form #form="ngForm" class="flex flex-col min-w-80">
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input class="ml-2" matInput ngModel required name="newPassword" [type]="hideNewPassword() ? 'password' : 'text'" placeholder="Password" />
+      <button mat-icon-button matSuffix type="button" (click)="hideNewPassword.set(!hideNewPassword())" [attr.aria-label]="'Mostra password'">
+        <mat-icon>{{ hideNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Confirm Password</mat-label>
+      <input class="ml-2" matInput ngModel required name="confirmPassword" [type]="hideConfirmPassword() ? 'password' : 'text'" placeholder="Conferma Password" />
+      <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword.set(!hideConfirmPassword())" [attr.aria-label]="'Mostra password'">
+        <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+    <button (click)="recovery(form.value)" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors cursor-pointer">
+      Modifica password
+    </button>
+  </form>
+</div>

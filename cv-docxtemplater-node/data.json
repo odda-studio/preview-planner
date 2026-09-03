@@ -1,0 +1,132 @@
+{
+  "highlights": "HIGHLIGHTS",
+  "experience": "EXPERIENCE",
+  "language": "LANGUAGE",
+  "name": "Mario Rossi",
+  "role": "Senior Backend Developer",
+  "seniority": "Senior",
+  "years": "12 ANNI",
+  "yearOfBirth": 1990,
+  "overview": "Sviluppatore backend con oltre 12 anni di esperienza nella progettazione e realizzazione di soluzioni software scalabili, performanti e orientate ai microservizi.\n\nSpecializzato nell'ecosistema .NET e C#, con una solida padronanza di ASP.NET Core, Entity Framework Core, CQRS e architetture event-driven basate su message broker come RabbitMQ e Azure Service Bus.\n\nNel corso della carriera ho collaborato con team distribuiti in ambienti Agile/Scrum, contribuendo alla definizione delle architetture tecniche, alla code review sistematica e alla mentorship di sviluppatori junior e mid-level.\n\nHo maturato esperienza significativa con Microsoft Azure: App Service, Azure Functions, Service Bus, Cosmos DB, Blob Storage, Key Vault e Application Insights. Gestione dell'infrastruttura tramite Terraform e Azure DevOps pipelines.\n\nAppassionato di clean code, principi SOLID e Domain-Driven Design, ho guidato con successo diversi progetti di migrazione da architetture monolitiche a microservizi, migliorando scalabilità, manutenibilità e time-to-market.\n\nUtilizzo regolarmente unit testing, integration testing e pratiche TDD. Contribuisco alla cultura tecnica aziendale attraverso knowledge sharing, documentazione interna e partecipazione a meetup tecnologici del settore.",
+  "skills": [
+    { "name": ".NET / C#" },
+    { "name": "ASP.NET Core" },
+    { "name": "Microservizi" },
+    { "name": "SQL Server" },
+    { "name": "Azure" }
+  ],
+  "otherSkills": [
+    { "skill": "Docker" },
+    { "skill": "Kubernetes" },
+    { "skill": "RabbitMQ" },
+    { "skill": "Redis" },
+    { "skill": "Terraform" },
+    { "skill": "Git / Azure DevOps" },
+    { "skill": "CI/CD" },
+    { "skill": "xUnit / NUnit" },
+    { "skill": "Entity Framework Core" }
+  ],
+  "languages": [
+    { "name": "Italiano", "level": "Madrelingua" },
+    { "name": "Inglese", "level": "C1" }
+  ],
+  "experiences": [
+    {
+      "head": "CloudSync S.p.A.",
+      "from": "2024",
+      "to": "Presente",
+      "title": "Tech Lead Backend",
+      "subtitle": "Milano | 2024 - Presente",
+      "techs": "C#, ASP.NET Core 8, Azure Service Bus, Cosmos DB, Docker, Kubernetes, Terraform, OpenTelemetry, GitHub Actions",
+      "description": "Coordinamento tecnico di un team di 6 sviluppatori backend su una piattaforma SaaS B2B per la gestione documentale. Definizione delle architetture di sistema, introduzione di standard di qualità del codice e revisione tecnica delle pull request. Migrazione dell'infrastruttura on-premise verso Azure con riduzione del 35% dei costi operativi."
+    },
+    {
+      "head": "FinTech Italia S.r.l.",
+      "from": "2022",
+      "to": "2024",
+      "title": "Senior Backend Developer",
+      "subtitle": "Milano | 2022 - 2024",
+      "techs": "C#, ASP.NET Core 6, SQL Server, Redis, RabbitMQ, Docker, Azure DevOps, Swagger/OpenAPI",
+      "description": "Sviluppo e manutenzione di API REST per una piattaforma di pagamenti digitali con oltre 500.000 transazioni giornaliere. Progettazione e implementazione di un sistema di notifiche real-time basato su WebSocket e RabbitMQ. Riduzione della latenza media delle API del 40% tramite ottimizzazione delle query SQL e introduzione di cache distribuita con Redis."
+    },
+    {
+      "head": "InsurTech Group S.p.A.",
+      "from": "2020",
+      "to": "2022",
+      "title": "Senior .NET Developer",
+      "subtitle": "Roma (Remote) | 2020 - 2022",
+      "techs": "C#, .NET 5, ASP.NET Core, PostgreSQL, Entity Framework Core, Azure Functions, Azure Blob Storage, NUnit",
+      "description": "Sviluppo di microservizi per la gestione di polizze assicurative in un contesto fortemente regolamentato. Progettazione del modulo di liquidazione sinistri con motore di calcolo basato su regole configurabili. Collaborazione con il team di data science per l'integrazione di modelli ML tramite API Python."
+    },
+    {
+      "head": "Nexus Banking S.p.A.",
+      "from": "2019",
+      "to": "2020",
+      "title": "Backend Developer (Consulente)",
+      "subtitle": "Milano | 2019 - 2020",
+      "techs": "C#, ASP.NET Core, SQL Server, MediatR, CQRS, Azure DevOps, Docker, xUnit",
+      "description": "Consulenza tecnica per la modernizzazione di un sistema core banking legacy. Reingegnerizzazione del modulo di riconciliazione contabile con architettura CQRS e pattern MediatR. Riduzione del tempo di elaborazione batch notturna da 4 ore a 45 minuti attraverso parallelizzazione e ottimizzazione delle transazioni."
+    },
+    {
+      "head": "Enterprise Solutions S.r.l.",
+      "from": "2017",
+      "to": "2019",
+      "title": "Backend Developer",
+      "subtitle": "Milano | 2017 - 2019",
+      "techs": "C#, .NET Core 2.1, ASP.NET Core, SQL Server, Redis, Azure DevOps, Hangfire, SignalR",
+      "description": "Sviluppo di un ERP verticale per il settore manifatturiero. Implementazione del modulo di gestione ordini e produzione con logica di scheduling automatico. Integrazione con sistemi SAP tramite RFC e web service SOAP. Introduzione di background jobs con Hangfire per l'elaborazione asincrona delle notifiche."
+    },
+    {
+      "head": "DataLab Consulting S.r.l.",
+      "from": "2016",
+      "to": "2017",
+      "title": ".NET Developer",
+      "subtitle": "Torino | 2016 - 2017",
+      "techs": "C#, .NET Framework 4.7, ASP.NET MVC 5, SQL Server, WCF, SSRS, NUnit, jQuery",
+      "description": "Sviluppo di applicazioni gestionali per clienti del settore logistica e distribuzione. Realizzazione di report complessi con SSRS e dashboard di monitoraggio KPI. Manutenzione evolutiva di un sistema di tracciamento spedizioni con interfaccia web e API WCF per l'integrazione con dispositivi mobili."
+    },
+    {
+      "head": "Softlab S.r.l.",
+      "from": "2015",
+      "to": "2016",
+      "title": "Junior .NET Developer",
+      "subtitle": "Roma | 2015 - 2016",
+      "techs": "C#, .NET Framework 4.5, ASP.NET MVC, SQL Server, Entity Framework 6, Bootstrap, JavaScript",
+      "description": "Partecipazione allo sviluppo di portali web per la pubblica amministrazione. Implementazione di moduli di gestione utenti, autenticazione federata con SPID e integrazione con banche dati nazionali tramite web service. Contributo alla scrittura di test unitari con MSTest."
+    },
+    {
+      "head": "Creative Digital Agency",
+      "from": "2014",
+      "to": "2015",
+      "title": "Web Developer",
+      "subtitle": "Roma | 2014 - 2015",
+      "techs": "C#, ASP.NET WebForms, SQL Server, JavaScript, jQuery, CSS3, HTML5, WordPress",
+      "description": "Sviluppo di siti web istituzionali e e-commerce per PMI. Realizzazione di un CMS custom in ASP.NET per la gestione dei contenuti. Integrazione di sistemi di pagamento online (PayPal, Stripe). Ottimizzazione SEO on-page e performance delle pagine con tecniche di lazy loading e minificazione."
+    },
+    {
+      "head": "TechStart S.r.l.",
+      "from": "2013",
+      "to": "2014",
+      "title": "Developer Trainee",
+      "subtitle": "Roma | 2013 - 2014",
+      "techs": "C#, .NET Framework 4.0, ASP.NET, SQL Server, Visual Basic .NET, Crystal Reports",
+      "description": "Primo impiego dopo la laurea triennale. Sviluppo e manutenzione di applicazioni desktop e web in ambiente Windows. Supporto tecnico e formazione degli utenti finali. Sviluppo di report aziendali con Crystal Reports e automazione di processi con script PowerShell."
+    },
+    {
+      "head": "Accenture S.p.A.",
+      "from": "2012",
+      "to": "2013",
+      "title": "Stage Sviluppatore",
+      "subtitle": "Roma | 2012 - 2013",
+      "techs": "Java, Spring MVC, Oracle DB, PL/SQL, HTML, CSS, JavaScript, SVN",
+      "description": "Stage curriculare durante il corso di laurea magistrale. Contributo allo sviluppo di un portale intranet per la gestione delle risorse umane di un cliente del settore bancario. Sviluppo di query PL/SQL per l'estrazione e la trasformazione dei dati. Prima esperienza in un contesto enterprise con metodologia Agile."
+    }
+  ],
+  "trainings": [
+    { "year": 2024, "title": "Certified Kubernetes Application Developer (CKAD)" },
+    { "year": 2023, "title": "Microsoft Certified: Azure Developer Associate (AZ-204)" },
+    { "year": 2022, "title": "HashiCorp Certified: Terraform Associate" },
+    { "year": 2021, "title": "Professional Scrum Developer I (PSD I) - Scrum.org" },
+    { "year": 2019, "title": "Microsoft Certified: Azure Fundamentals (AZ-900)" }
+  ]
+}

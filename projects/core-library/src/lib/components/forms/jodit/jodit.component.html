@@ -1,0 +1,57 @@
+<div class="py-4 flex items-center gap-2">
+
+    {{formField().label || formField().name}}
+    @if (formField().tooltip) {
+    <mat-icon matSuffix [matTooltip]="formField().tooltip">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+            class="size-5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+
+
+    </mat-icon>
+    }
+</div>
+
+
+@if (hasPreview()) {
+<button (click)="showPreviewFull()">Preview</button>
+}
+<textarea class="w-full h-full" #editor></textarea>
+
+
+<ng-template #modalPreview>
+    <div class="p-4 text-md flex flex-col gap-4 overflow-auto">
+        <div class="mb-4 p-4 border border-l-4 border-black-500 text-black" role="alert">
+            <p class="font-bold">Attenzione</p>
+            <div>
+                Testa il template di preview. Il contenuto reale sarà quello dell'editor, questo è solo un esempio di
+                come
+                potrebbe essere strutturato. Inserisci un'email valida per vedere l'anteprima renderizzata
+                correttamente.
+                Puoi inserire più email separate da virgola per inviare a più destinatari.
+            </div>
+            <div>
+                Modificando i valori nell'editor, l'anteprima si aggiornerà in tempo reale. Considera che l'anteprima
+                comprende anche il template del padre, quindi potrebbe esserci del contenuto aggiuntivo oltre a quello
+                inserito nell'editor.
+            </div>
+        </div>
+
+
+
+        <div class="flex gap-4 items-center">
+            <mat-form-field class="w-full py-2" appearance="outline">
+                <mat-label>Email di prova</mat-label>
+                <input matInput class="ml-2" [formControl]="emailFormControl">
+            </mat-form-field>
+            <button [disabled]="emailFormControl.invalid"
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                (click)="sendTestEmail()">Invia</button>
+        </div>
+        <div class="w-full h-full overflow-auto" [innerHTML]="previewEmail()"></div>
+
+    </div>
+
+</ng-template>

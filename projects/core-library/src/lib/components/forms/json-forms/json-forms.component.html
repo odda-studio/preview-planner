@@ -1,0 +1,34 @@
+<!-- JSON Forms component template -->
+<form [formGroup]="formGroup()">
+  @for (row of rows(); track formName() + '_ROW_' + $index) {
+    <div class="form-row" [style.gridTemplateColumns]="gridTemplateColumns()">
+      @for (col of row; track col.name) {
+        @let templateName = col.templateName ?? (col.field.lookup ? 'lookup' : null);
+        @let customComponent = templateName ? components[templateName] : null;
+
+        <div [style.grid-column]="'span ' + (col.layout.span || 1)">
+          @if (customComponent) {
+            <ng-container *ngComponentOutlet="customComponent; inputs: {
+            context: value(),
+            formField: col,
+            formGroup: formGroup(),
+            formControl: formGroup().controls[col.formFieldName],
+            entityMetadata: col.field.lookup?.entity || metadata()
+            }"></ng-container>
+          } @else {
+
+            <lib-base-form-input [entityMetadata]="col.field.lookup?.entity || metadata()"
+                                 [formGroup]="formGroup()"
+                                 [formControl]="$any(formGroup().controls[col.formFieldName])" [context]="formGroup().value"
+                                 [formField]="col"/>
+          }
+        </div>
+      }
+    </div>
+  }
+  <div>
+    <button class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors cursor-pointer" (click)="handleSubmit()">
+      Conferma
+    </button>
+  </div>
+</form>

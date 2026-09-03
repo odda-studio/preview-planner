@@ -1,0 +1,6 @@
+<ng-content></ng-content>
+@if (layoutService.isMobile() && layoutService.sidenavOpen()) {
+  <div (click)="layoutService.closeSidenav()" class="fixed top-0 left-0 h-dvh w-dvw bg-[#00000080] bg-blend-overlay">
+
+  </div>
+}

@@ -1,0 +1,9 @@
+:host {
+  width: 100%;
+  outline: var(--input-outline);
+  background: var(--input-background-color);
+  border-radius: var(--input-border-radius);
+  border: var(--input-border-default);
+  padding: var(--input-padding);
+  min-height: var(--input-min-height);
+}

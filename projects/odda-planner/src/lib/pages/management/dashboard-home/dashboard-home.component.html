@@ -1,0 +1,262 @@
+@let _link = link();
+@let tk = accessToken();
+@if (_link && tk) {
+<iframe #dashboardIframe class="w-full h-full" [src]="_link" (load)="sendAuthToken()"></iframe>
+}
+@else if (isHr() && !userId()) {
+@if(tk) {
+<iframe class="w-full h-full"
+  src="https://analytics.oddacoding.net/public/dashboard/9a7e196a-1115-43a3-b473-12156edc3dd4"></iframe>
+
+}
+
+
+} @else {
+<div class="p-4">
+  <!-- Griglia responsive: 1 colonna mobile, 2 tablet, 3 desktop -->
+
+  @if (timesheets.value()?.length && isExternal()) {
+  <div class="mb-4 p-4 border border-l-4 border-yellow-500 text-black" role="alert">
+    <p class="font-bold">Attenzione</p>
+    <p>Visita la pagina delle nostre <a class="font-bold" [routerLink]="'/management/faq'">FAQ</a> per ulteriori
+      informazioni.</p> <br /> In data <b>28/04/2026</b>, a seguito di alcune modifiche nei processi di fatturazione e
+    approvazione dei timesheet nonché per far fronte ad eventuali dubbi abbiamo aggiornato le <a class="font-bold"
+      [routerLink]="'/management/faq'">FAQ</a>
+  </div>
+
+
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-4">
+    @for (time of timesheets.value(); track time.id) {
+    <div class="relative bg-[#222] rounded-lg base-box-shadow duration-300 p-2">
+
+
+      @if(getViewMode(time.uuid!) === 'calendar') {
+      <app-calendar style="font-size: 11px" class="p-0" #calendar [month]="time.month!" [year]="time.year!"
+        [items]="time.events" [isHoliday]="isHoliday" [monthSelectorEnabled]="false">
+        <div title class="flex justify-between text-xs gap-2 items-center w-full">
+          <div class="text-lg flex items-center gap-2">
+            @let monthName = getMonthName(time.month!);
+
+            {{time.client?.businessName}} @if(monthName){({{monthName}})}
+
+            <!-- Pulsante per switchare vista -->
+            <button (click)="toggleViewMode(time.uuid!)"
+              class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-xs transition-all duration-200 flex items-center gap-1 cursor-pointer"
+              [title]="getViewMode(time.uuid!) === 'calendar' ? 'Passa a vista lista' : 'Passa a vista calendario'">
+              @if (getViewMode(time.uuid!) === 'calendar') {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              }
+            </button>
+            <button (click)="openUploadModal(time.uuid!)"
+              class="px-2 py-1 bg-gray-700 relative hover:bg-gray-600 text-white rounded text-xs transition-all duration-200 flex items-center gap-1 cursor-pointer"
+              title="Carica documenti">
+              @if (hasProformaDocument(time)) {
+              <div
+                class="absolute -top-2 -right-2 bg-green-600 text-white rounded-full p-0.5 text-xs flex items-center gap-1 z-10 shadow">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              }
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+            </button>
+          </div>
+          <div>
+            <!-- Pulsante submit visibile solo se non confermato -->
+            @if (!time.submitted) {
+            <button (click)="confirmTimesheetSubmit(time.uuid!)" [disabled]="submittingTimesheetId() === time.uuid"
+              class="px-4 py-2 bg-black hover:bg-green-700 cursor-pointer text-white rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center "
+              title="Conferma timesheet">
+              @if (submittingTimesheetId() === time.uuid) {
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+              <span>Invio...</span>
+              } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              }
+            </button>
+            } @else {
+            <span class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium text-sm flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Confermato</span>
+            </span>
+            }
+          </div>
+        </div>
+        <ng-template calendarEventTemplate="day" let-item="item" let-value>
+          <div class="flex justify-center items-center w-full h-full overflow-hidden text-sm">
+            @if(checkDays(item.date, time.order.endDate!)) {
+            <select [(ngModel)]="value.hours" (ngModelChange)="setValue($event, item)"
+              class="text-lg px-2 py-1 rounded outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+              <option [value]="0">0</option>
+              <option [value]="1">1</option>
+              <option [value]="2">2</option>
+              <option [value]="3">3</option>
+              <option [value]="4">4</option>
+              <option [value]="5">5</option>
+              <option [value]="6">6</option>
+              <option [value]="7">7</option>
+              <option [value]="8">8</option>
+              <option [value]="9">9</option>
+              <option [value]="10">10</option>
+            </select>
+            }
+
+          </div>
+        </ng-template>
+
+      </app-calendar>
+      }
+
+
+      <!-- Vista Lista -->
+      @if (getViewMode(time.uuid!) === 'list') {
+      <div class="flex flex-col gap-4 max-h-[500px] overflow-visible">
+        <div title class="flex justify-between text-xs gap-2 items-center w-full">
+          <div class="text-lg text-white flex items-center gap-2">
+            @let monthName = getMonthName(time.month!);
+
+            <span class="font-bold pl-2">
+              {{time.client?.businessName}} @if(monthName){({{monthName}})}
+
+            </span>
+
+            <!-- Pulsante per switchare vista -->
+            <button (click)="toggleViewMode(time.uuid!)"
+              class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-xs transition-all duration-200 flex items-center gap-1"
+              [title]="getViewMode(time.uuid!) === 'calendar' ? 'Passa a vista lista' : 'Passa a vista calendario'">
+              @if (getViewMode(time.uuid!) === 'calendar') {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              }
+            </button>
+
+            <button (click)="openUploadModal(time.uuid!)"
+              class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-xs relative transition-all duration-200 flex items-center gap-1"
+              title="Carica documenti">
+              @if (hasProformaDocument(time)) {
+              <div
+                class="absolute -top-2 -right-2 bg-green-600 text-white rounded-full p-0.5 text-xs flex items-center gap-1 z-10 shadow">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              }
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+            </button>
+          </div>
+          <div>
+            <!-- Pulsante submit visibile solo se non confermato -->
+            @if (!time.submitted) {
+            <button (click)="confirmTimesheetSubmit(time.uuid!)" [disabled]="submittingTimesheetId() === time.uuid"
+              class="px-4 py-2 bg-black hover:bg-green-700 cursor-pointer text-white rounded-lg font-medium text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              title="Conferma timesheet">
+              @if (submittingTimesheetId() === time.uuid) {
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+              <span>Invio...</span>
+              } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              }
+            </button>
+            } @else {
+            <span class="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium text-sm flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Confermato</span>
+            </span>
+            }
+          </div>
+        </div>
+        <div class="overflow-y-auto space-y-2 text-white custom-scrollbar px-2">
+          @for (day of getMonthDays(time); track day.dayNumber) {
+          <div class="p-3  border-b !border-[#404040] b-0.5">
+            <div class="flex items-center gap-3">
+              <div class="min-w-16 text-sm font-medium">
+                {{ formatDate(day.date) }}
+              </div>
+              @if (!day.isAfterEndDate) {
+              <div class="flex-1 flex gap-2">
+                <div class="flex-shrink-0">
+                  <label class="block text-xs mb-1">Ore</label>
+                  <select [ngModel]="day.workingDay?.hours || 0" (ngModelChange)="setValue($event, day.workingDay)"
+                    [disabled]="!day.workingDay"
+                    class="text-white text-sm px-2 py-1 rounded outline-none bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed w-16">
+                    <option [value]="0">0</option>
+                    <option [value]="1">1</option>
+                    <option [value]="2">2</option>
+                    <option [value]="3">3</option>
+                    <option [value]="4">4</option>
+                    <option [value]="5">5</option>
+                    <option [value]="6">6</option>
+                    <option [value]="7">7</option>
+                    <option [value]="8">8</option>
+                    <option [value]="9">9</option>
+                    <option [value]="10">10</option>
+                  </select>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-xs mb-1">Note</label>
+                  <input type="text" [value]="day.workingDay?.description || ''"
+                    (blur)="day.workingDay?.id && setDescription($event, day.workingDay.id)"
+                    [disabled]="!day.workingDay" placeholder="Note..."
+                    class="w-full text-sm px-2 py-1 placeholder-white rounded outline-none bg-gray-700 text-white placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+                </div>
+              </div>
+              } @else {
+              <div class="flex-1 text-xs text-gray-500">
+                Fuori periodo contratto
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+
+      }
+    </div>
+    }
+  </div>
+</div>
+}

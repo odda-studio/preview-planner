@@ -1,0 +1,8 @@
+@let id = this.value();
+@if (id) {
+  <button mat-icon-button (click)="viewPdf()" color="primary" matTooltip="Visualizza PDF">
+    <mat-icon>visibility</mat-icon>
+  </button>
+} @else {
+  <span>-</span>
+}

@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>✅ Dispositivo Creato con Successo!</h2>
+
+<mat-dialog-content>
+  <div class="success-message">
+    <div class="success-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <p>Il dispositivo <strong>{{ data.deviceName }}</strong> è stato configurato correttamente.</p>
+  </div>
+
+  <div class="recovery-section">
+    <div class="warning-box">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <strong>⚠️ ATTENZIONE: Salva questa Recovery Key ORA!</strong>
+        <p>
+          Questa è l'<strong>UNICA VOLTA</strong> che vedrai questa Recovery Key.
+          NON verrà salvata nel browser per motivi di sicurezza.
+          Se dimentichi la password del dispositivo, questa chiave è l'UNICO modo per recuperare 
+          l'accesso alle tue password. <strong>Salvala ADESSO in un posto sicuro!</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="recovery-key-display">
+      <label>Recovery Key:</label>
+      <div class="key-box">
+        <code>{{ data.recoveryCode }}</code>
+        <button mat-icon-button (click)="copyRecoveryCode()" title="Copia recovery key">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="checklist">
+      <h4>Prima di continuare:</h4>
+      <mat-checkbox [(ngModel)]="savedInSafePlace">
+        Ho salvato la Recovery Key in un posto sicuro
+      </mat-checkbox>
+      <mat-checkbox [(ngModel)]="understoodImportance">
+        Comprendo che senza questa chiave non potrò recuperare le password se dimentico la password del dispositivo
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="tips-section">
+    <h4>💡 Dove salvare la Recovery Key:</h4>
+    <ul>
+      <li>📝 Scrivila su carta e conservala in un posto sicuro (cassaforte, cassetta di sicurezza)</li>
+      <li>🔐 In un password manager DIVERSO da questo (es. LastPass, 1Password, Bitwarden)</li>
+      <li>💾 In un file criptato su un drive esterno offline</li>
+      <li>☁️ In un cloud storage cifrato (es. note cifrate su iCloud/Google Drive)</li>
+      <li>❌ <strong>NON</strong> salvarla in chiaro sul computer o nel browser</li>
+      <li>❌ <strong>NON</strong> inviarla via email o messaggi non cifrati</li>
+    </ul>
+    <p style="margin-top: 1rem; color: #dc2626; font-weight: 600;">
+      ⚠️ Senza questa Recovery Key, se perdi la password del dispositivo, 
+      <strong>non potrai MAI più accedere alle tue password!</strong>
+    </p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onConfirm()"
+    [disabled]="!savedInSafePlace || !understoodImportance"
+  >
+    Ho Salvato la Recovery Key, Continua
+  </button>
+</mat-dialog-actions>

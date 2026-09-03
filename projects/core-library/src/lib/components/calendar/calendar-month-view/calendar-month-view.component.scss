@@ -1,0 +1,122 @@
+.day {
+  width: 100%;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.calendar-header {
+  background-color: #222;
+}
+
+.container {
+  width: 100%;
+  overflow: hidden;
+  max-width: unset;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  text-align: center;
+  user-select: none;
+  background-color: rgb(34,34,34);
+  color: white;
+}
+.container-days {
+  position: relative;
+  &::before {
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: rgb(64,64,64);
+    left: 0;
+    bottom: 0;
+  }
+  &::after {
+    content: ' ';
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    background-color: rgb(64,64,64);
+    right: 0;
+    top: 0;
+  }
+}
+.container-days {
+  .day {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 75px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    .day-number {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      width: 2em;
+      height: 2em;
+
+      &-overflow {
+        color: #7a7c7c;
+      }
+    }
+
+    // height: 5em;
+    position: relative;
+    &::before {
+      content: ' ';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background-color: rgb(64,64,64);
+      left: 0;
+      top: 0;
+    }
+    &::after {
+      content: ' ';
+      position: absolute;
+      height: 100%;
+      width: 1px;
+      background-color: rgb(64,64,64);
+      left: 0;
+      top: 0;
+    }
+  }
+
+}
+
+.new-event {
+  z-index: 100;
+  @apply absolute w-full bg-blue shadow-2xl;
+  &::after {
+    content: ' ';
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    @apply bg-blue;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+  }
+}
+
+.active {
+  .day-number {
+    background-color: red;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+  }
+  // background-color: #d3e7ef;
+}
+
+.holiday {
+  background-color: rgb(42,42,42)
+}
+
+.disabled {
+  // background-color: #7a7c7c;
+}

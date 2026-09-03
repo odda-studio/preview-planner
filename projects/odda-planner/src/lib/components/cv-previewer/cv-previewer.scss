@@ -1,0 +1,40 @@
+// A4: 210mm × 297mm
+// Margini: top/bottom 11mm, left/right 15mm
+// Area stampabile: (297 - 11 - 11) = 275mm (h), (210 - 15 - 15) = 180mm (w)
+:host {
+    display: block;
+    position: relative;
+    width: 210mm;
+    margin: 0 auto;
+    padding: 11mm 15mm;
+    background: #fff;
+
+    @media print {
+        padding: 0;
+        box-shadow: none;
+        width: 100%;
+        margin: 0;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 100;
+        // Area stampabile in altezza = 297mm - 11mm - 11mm = 275mm
+        // Offset gradient = padding top = 11mm
+        // background: repeating-linear-gradient(to bottom,
+        //         transparent 0,
+        //         transparent calc(275mm - 2px),
+        //         rgba(251, 146, 60, 0.55) calc(275mm - 2px),
+        //         rgba(251, 146, 60, 0.55) 275mm,
+        //         transparent 275mm,
+        //         transparent 297mm);
+        // background-position: 0 11mm;
+
+        @media print {
+            display: none;
+        }
+    }
+}

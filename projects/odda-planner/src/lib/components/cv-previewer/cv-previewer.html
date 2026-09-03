@@ -1,0 +1,298 @@
+<html>
+
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <style type="text/css">
+        @import url(https://themes.googleusercontent.com/fonts/css?kit=528uNUjULZK_VPK4xVLkdBIGwzbme1FiC-4UaUMjcU0WWSqDg9hSc-cjKD92Q1x37XPe2qoyN3AtmTITv7KmfICUB_ps7o72rajHZrQ_LGdBfbVHgM-ryt1pyRGRQMeAhCjxG4vvkxeS0wcuwRlFirvO3xON97blIy3VAXs0u8tqqJAr6nwI9GwP-hlIuv7d);
+
+        html {
+            font-family: "Epilogue", sans-serif;
+            color: black;
+        }
+
+
+        ol {
+            margin: 0;
+            padding: 0
+        }
+
+        * {
+            line-height: 1.5;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table td,
+        table th {
+            padding: 0
+        }
+
+        .candidate-name {
+            font-size: 14pt;
+            font-weight: 500;
+        }
+
+        .candidate-title {
+            font-size: 11pt;
+            font-weight: 400;
+        }
+
+        .candidate-seniority {
+            font-size: 9pt;
+            font-weight: 400;
+            font-family: "Fragment Mono";
+        }
+
+        .candidate-birth {
+            font-size: 9pt;
+            font-weight: 400;
+            font-family: "Fragment Mono";
+            color: #999999;
+        }
+
+        .section-label {
+            white-space: nowrap;
+            font-size: 11pt;
+            font-family: "Fragment Mono";
+            color: #2000ff;
+            font-weight: 400
+        }
+
+        .techs {
+            font-size: 11pt;
+            font-weight: 600;
+        }
+
+        .techs.secondary {
+            font-size: 11pt;
+            font-weight: 400;
+        }
+
+        .techs.years {
+            font-size: 9pt;
+            font-weight: 400;
+            display: flex;
+            justify-content: center;
+            text-transform: uppercase;
+
+        }
+        .techs.years::before {
+            content: '|';
+            margin: 0 2px;
+            color: #999999;
+        }
+
+        .language.level {
+            font-size: 9pt;
+            font-weight: 400;
+            color: #999999;
+            text-transform: uppercase;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 12rem 1fr;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .gap-\.5 {
+            gap: 2px;
+        }
+
+        .gap-1 {
+            gap: 4px;
+        }
+
+        .gap-2 {
+            gap: 8px;
+        }
+
+        .gap-8 {
+            gap: 32px;
+        }
+
+        .gap-4 {
+            gap: 16px;
+        }
+
+        .gap-11pt {
+            gap: 11pt;
+        }
+
+        .space-11pt {
+            margin-top: 11pt;
+        }
+
+        .experience .period {
+            font-size: 9pt;
+            font-family: "Fragment Mono";
+            color: #999999;
+        }
+
+        .experience .title {
+            font-size: 11pt;
+            font-weight: 500;
+        }
+
+        .experience .techs {
+            font-size: 9pt;
+            font-weight: 400;
+        }
+
+        .experience .description {
+            font-size: 9pt;
+            font-weight: 400;
+            color: #999999;
+        }
+
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+
+        .mb-6pt {
+            margin-bottom: 6pt;
+        }
+
+        .overview {
+            font-size: 9pt;
+            font-weight: 400;
+        }
+        
+        .justify-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        .align-center {
+            display: flex;
+            align-items: center;
+        }
+
+        .text-uppercase {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body class="c24 c39 doc-content">
+
+    <div class="grid-layout">
+
+        <img alt="" src="https://planner.oddacoding.net/logo_odda.png"
+            style="width: 136.00px; height: 45.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+            title="">
+        <div>
+            @let years = candidateBaseInfo()?.yearsExperience ?? 0;
+            <div class="candidate-name">{{candidateBaseInfo()?.name}}</div>
+            <div class="candidate-title">{{candidateBaseInfo()?.role}}</div>
+            <div class="candidate-seniority text-uppercase"> @if(years) { <span class="text-uppercase">{{candidateBaseInfo()?.seniorityLabel}} </span>|
+                {{years}} {{years > 1 || years === 0 ? yearsLabel() : yearLabel()}}}</div>
+                <div class="candidate-birth">{{candidateBaseInfo()?.birthYear}}</div>
+        </div>
+        <div class="flex flex-col">
+            <div class="flex flex-col">
+                <div class="section-label">*{{evidenceTitle()}}</div>
+                <div class="space-11pt"></div>
+                <div>
+                    @for (item of techs(); track item.id) {
+                    <div class="flex gap-\.5 align-center">
+                        <div class="techs">
+                            {{item.skill}}
+                        </div>
+                        @if(item.years) {
+                            <div class="techs years justify-center">{{item.years}} {{item.years && item.years > 1 || item.years === 0 ? yearsLabel() : yearLabel()}}</div>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <div class="space-11pt"></div>
+                <div class="space-11pt"></div>
+                <div class="section-label">*{{otherSkillsTitle()}}</div>
+                <div class="space-11pt"></div>
+                <div>
+                    @for (item of otherSkills(); track item.id) {
+                    <div class="techs secondary">
+                        {{item.name}}
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <div class="space-11pt"></div>
+                <div class="space-11pt"></div>
+                <div class="section-label">*{{languagesLabel()}}</div>
+                <div class="space-11pt"></div>
+                <div>
+                    @for (item of languages(); track item.id) {
+                    <div class="techs secondary">
+                        {{item.language}} | <span class="language level">{{item.level}}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col gap-8">
+            <div class="overview" [innerText]="candidateBaseInfo()?.overview">
+                {{candidateBaseInfo()?.overview}}
+            </div>
+            <div class="flex flex-col gap-11pt">
+                <div class="section-label">*{{experienceLabel()}}</div>
+
+                @for(item of experiences(); track item.id) {
+                <div class="experience">
+                    <div class="period">
+                        {{item.period}}</div>
+                    <div class="title mb-6pt">
+                        {{item.company}} - {{item.role}}
+                    </div>
+                    <div class="techs">
+                        {{techsLable()}}: {{item.technologies}}
+                    </div>
+                    <div [innerText]="item.description" class="description">
+                        {{item.description}}
+                    </div>
+                </div>
+
+                }
+            </div>
+            <div class="flex flex-col gap-11pt">
+                <div class="section-label">*{{trainingAndCertificationLabel()}}</div>
+
+                @for(item of trainingAndCertifications(); track item.id) {
+                <div class="experience">
+                    <div class="period">
+                        {{item.year}}</div>
+                    <div class="title mb-6pt">
+                        {{item.title}}
+                    </div>
+                    <div class="description">
+                        {{item.description}}
+                    </div>
+                </div>
+
+                }
+            </div>
+        </div>
+        <div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+:host {
+  width: 100%;
+  display: flex;
+  height: var(--header-height);
+  background-color: var(--header-background-color);
+  box-shadow: var(--header-box-shadow);
+  -webkit-box-shadow: var(--header-box-shadow);
+  justify-items: center;
+  position: relative;
+}
+
+/* Mobile toggle button */
+.mobile-toggle {
+  position: absolute;
+  z-index: 100;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  left: .5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mobile-toggle.right {
+  left: auto;
+  right: 1rem;
+}

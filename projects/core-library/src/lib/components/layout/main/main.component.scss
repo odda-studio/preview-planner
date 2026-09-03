@@ -1,0 +1,7 @@
+:host {
+  transform: translateX(var(--sidenav-width));
+}
+
+:host[full=true] {
+  transform: translateX(0);
+}

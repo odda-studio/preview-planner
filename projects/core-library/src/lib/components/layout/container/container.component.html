@@ -1,0 +1,13 @@
+<div class="layout" [class.sidenav-closed]="!isSidenavOpen" [class.sidenav-right]="sidenavPosition === 'right'">
+  <div class="sidenav">
+    <ng-content select="[sidenav]"></ng-content>
+  </div>
+  <div class="content">
+    <div class="navbar">
+      <ng-content select="[navbar]"></ng-content>
+    </div>
+    <div class="main-content">
+      <ng-content select="[content]"></ng-content>
+    </div>
+  </div>
+</div>

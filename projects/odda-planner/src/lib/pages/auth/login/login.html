@@ -1,0 +1,19 @@
+<div>
+  <form #form="ngForm" class="flex flex-col min-w-80">
+    <mat-form-field appearance="outline">
+      <mat-label>Username</mat-label>
+      <input class="ml-2" matInput ngModel required name="username" placeholder="username" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input class="ml-2" matInput ngModel required name="password" type="password" placeholder="password" />
+    </mat-form-field>
+    <button (click)="login(form.value)" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors cursor-pointer">
+      Login
+    </button>
+  </form>
+  <a routerLink="/auth/recovery" class="mt-6 text-md hover:underline cursor-pointer">
+    Password dimenticata?
+  </a>
+</div>

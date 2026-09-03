@@ -1,0 +1,72 @@
+
+<div class="calendar-header flex bg-black text-white justify-between">
+  <div class="items-center font-bold flex pl-2 w-full">
+    <ng-content select="[title]"></ng-content>
+  </div>
+  @if (monthSelectorEnabled) {
+    <div  class="flex">
+      <div
+        class="p-1 px-3 m-2 bg-gray-700 rounded"
+        (click)="previousMonth()">
+        <
+      </div>
+      <div class="p-3">
+        {{months[currentMonth]}}
+      </div>
+      <div
+        class="p-1 px-3 m-2 bg-gray-700 rounded"
+        (click)="nextMonth()">
+        >
+      </div>
+    </div>
+  }
+</div>
+
+<div class="container">
+  @for (i of dayWeek; track 'day' + i) {
+    <div class="day">
+      {{i}}
+    </div>
+  }
+</div>
+<div class="container container-days">
+  @for (day of days; track 'day-content' + calendarId() + day.id) {
+    @let i = $index;
+    <div class="day"
+         [class.day-right]="(i - 1) % 7 === 0"
+         [class.active]="day.active"
+         [class.holiday]="day.holiday"
+         (mousedown)="mouseDown(day, i)"
+         (mouseover)="mouseOver(day, i)"
+         (dblclick)="handleDbClick($event, day)"
+         (mouseup)="mouseUp()"
+         (contextmenu)="onContextMenu($event, day)"
+    >
+      <div class="flex justify-between w-full p-1" #header (click)="reset($event)">
+        <div></div>
+        <div class="day-number" [class.day-number-overflow]="day.overflow">
+          {{day.day}}
+        </div>
+      </div>
+      <div class="overflow-x-auto" [style.height]="'calc(100% - ' + header.getBoundingClientRect().height + 'px)'">
+        @if (newItems[i] && !day.holiday) {
+          <div class="new-event" (click)="reset($event)">
+            &nbsp;
+          </div>
+        }
+
+        @for (event of day.items; track event.id  + $index + '_' + calendarId()) {
+          <div (click)="reset($event)">
+            @if (templateList[event.template]) {
+              <ng-container *ngComponentOutlet="templateList[event.template];inputs: {data: event}"></ng-container>
+            }
+          </div>
+        }
+
+      </div>
+
+    </div>
+  }
+
+</div>
+

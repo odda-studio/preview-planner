@@ -1,0 +1,43 @@
+@let tableMetadata = metadata.value();
+@let table = tableName();
+@if (tableMetadata) {
+<!-- Header with title and button -->
+<div class="flex justify-between items-center p-5 border-b">
+  @let _component = titleComponent();
+  @if(_component){
+  <ng-container *ngTemplateOutlet="_component"></ng-container>
+  } @else {
+  <h1 class="text-xl font-semibold">{{ title() || entityName() }}</h1>
+  }
+  @if (tableMetadata.enablePost) {
+  <button class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition-colors cursor-pointer"
+    (click)="createNew()">
+    Add New
+  </button>
+  }
+
+</div>
+
+@if (false) {
+<!-- <lib-worksheet (updateRow)="updateRow($event)" (deleteRow)="deleteRow($event)" (showFilters)="onShowFilters()"
+  [(pageSize)]="pageSize" [(filters)]="filters" [(filtersNode)]="filtersNode" [advancedFiltersEnabled]="true"
+  [(sorting)]="sorting" [allowSelection]="allowSelection()" [(selectedRowsData)]="selectedRowsData" #tableComponent
+  class="block" [metadata]="tableMetadata" [tableName]="table" /> -->
+
+}
+
+
+<lib-data-table (copyRow)="copyRow($event)" (updateRow)="updateRow($event)" (deleteRow)="deleteRow($event)" (showFilters)="onShowFilters()"
+  [(pageSize)]="pageSize" [(filters)]="filters" [(filtersNode)]="filtersNode" [advancedFiltersEnabled]="true"
+  [(sorting)]="sorting" [allowSelection]="allowSelection()" [(selectedRowsData)]="selectedRowsData" #tableComponent
+  class="p-5 block" [metadata]="tableMetadata" [tableName]="table" />
+
+<ng-template #form>
+  @let formName = currentFormName();
+  @if (formName) {
+  <lib-json-forms (onSubmit)="handleSubmit($event)" [value]="currentRow()" [metadata]="tableMetadata"
+    [formName]="formName" />
+  }
+
+</ng-template>
+}

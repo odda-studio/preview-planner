@@ -1,0 +1,36 @@
+<div class="faq-container">
+  <mat-card class="faq-header">
+    <mat-card-header>
+      <mat-card-title>
+        FAQ – Guida operativa
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Qui trovi le risposte alle domande più frequenti sulla gestione del tuo incarico, timesheet e fatturazione.</p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-accordion class="faq-accordion">
+    @for (faq of faqs; track $index) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span class="question-number">{{ $index + 1 }}.</span>
+            {{ faq.question }}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (faq.isHtml) {
+          <div [innerHTML]="faq.answer"></div>
+        } @else {
+          <p>{{ faq.answer }}</p>
+        }
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  <mat-card class="contact-info">
+    <mat-card-content>
+      <p><strong>Hai altre domande?</strong> Contatta il team Odda o scrivi a report@oddastudio.com</p>
+    </mat-card-content>
+  </mat-card>
+</div>

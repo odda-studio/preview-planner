@@ -1,0 +1,65 @@
+name: Deploy fe
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag oddastudio/planner-fe-ssr
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push the Docker image
+        run: docker push oddastudio/planner-fe-ssr
+  
+  build-and-push-docker-image-cv-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile.cv-builder --tag oddastudio/planner-cv-builder
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push the Docker image
+        run: docker push oddastudio/planner-cv-builder
+
+  update-portainer-stack:
+    needs: [build-and-push-docker-image]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dkershner6/post-api-call-action@v1
+        with:
+          url: https://portainer.oddacoding.net/api/webhooks/ed10afd3-02e2-43c8-b3bc-24a3c2939272?apikey=${{ secrets.API_KEY_DEPLOY }}
+      - name: Notify Slack
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+
+          if [ "$STATUS" = "success" ]; then
+            COLOR="#2eb886"
+            MESSAGE="✅ Build riuscita su ${{ github.repository }}"
+          else
+            COLOR="#e01e5a"
+            MESSAGE="❌ Build FALLITA su ${{ github.repository }}"
+          fi
+
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"attachments\": [
+              {
+                \"color\": \"${COLOR}\",
+                \"text\": \"${MESSAGE}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nAuthor: ${{ github.actor }}\"
+              }
+            ]
+          }" \
+          https://hooks.slack.com/services/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

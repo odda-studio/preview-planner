@@ -1,0 +1,153 @@
+<div class="cvo-page">
+  <div class="cvo-header">
+    <h1 class="cvo-title">CV</h1>
+    <span class="cvo-count">
+      @if (totalCount() != null) {
+      {{ groupedCvs().length }} talent · {{ totalCount() }} versioni totali
+      }
+    </span>
+  </div>
+
+  <div class="cvo-search-wrap">
+    <svg class="cvo-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+    </svg>
+    <input type="text" class="cvo-search" placeholder="Cerca per nome o email…" [(ngModel)]="search" />
+    @if (search()) {
+    <button class="cvo-search-clear" type="button" (click)="clearSearch()" aria-label="Cancella ricerca">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 6 6 18M6 6l12 12" />
+      </svg>
+    </button>
+    }
+    @if (cvs.isLoading()) {
+    <span class="cvo-search-spinner"></span>
+    }
+  </div>
+
+  @if (cvs.isLoading() && !loadedItems().length) {
+  <div class="cvo-state cvo-state--loading">
+    <span>Caricamento in corso…</span>
+  </div>
+  }
+  @else if (cvs.error()) {
+  <div class="cvo-state cvo-state--error">
+    <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+    <span>Errore nel caricamento dei CV</span>
+  </div>
+  } @else if (!groupedCvs().length) {
+  <div class="cvo-state">
+    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    <span>Nessun CV trovato</span>
+  </div>
+  } @else {
+  <div class="cvo-grid">
+    @for (group of groupedCvs(); track group.talentId) {
+    <div class="cvo-card">
+
+      <!-- Header talent -->
+      <div class="cvo-card-header">
+        @if (group.imageUrl && !imgErrors.has(group.talentId!)) {
+        <img class="cvo-avatar" [src]="group.imageUrl" [alt]="group.name ?? ''" (error)="onImgError(group.talentId)" />
+        } @else {
+        <div class="cvo-avatar cvo-avatar--fallback">
+          {{ (group.name ?? '?').charAt(0).toUpperCase() }}
+        </div>
+        }
+        <div class="cvo-card-name-wrap">
+          <div class="cvo-name-row flex items-center gap-4">
+            <span class="cvo-name">{{ group.name ?? '–' }}</span>
+            @if (group.versions[0]?.verified) {
+            <svg class="cvo-verified-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              title="Ultima versione verificata">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            }
+          </div>
+          <span class="cvo-versions-count">
+            {{ group.versions.length }} {{ group.versions.length === 1 ? 'versione' : 'versioni' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Info contatto -->
+      <div class="cvo-card-body">
+        @if (group.email) {
+        <div class="cvo-info-row">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span>{{ group.email }}</span>
+        </div>
+        }
+        @if (group.phone) {
+        <div class="cvo-info-row">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          <span>{{ group.phone }}</span>
+        </div>
+        }
+        @if(group.pdfUrl) {
+          
+        }
+      </div>
+
+
+      <div class="cvo-card-footer flex flex-col gap-2">
+        @if(group.pdfUrl) {
+        <a class="cvo-btn-primary" [href]="group.pdfUrl" target="_blank">
+          Download PDF
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </a>
+
+        <button class="cvo-btn-secondary" type="button" (click)="copyPdfUrl(group.pdfUrl)">
+          Copia URL PDF
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 10h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+        }
+
+        <a class="cvo-btn-primary" [routerLink]="['/management/cv-builder', group.talentId]">
+          Apri CV Maker
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+    }
+  </div>
+
+  @if (hasMore()) {
+  <div class="cvo-load-more">
+    <button class="cvo-btn-load-more" [disabled]="cvs.isLoading()" (click)="loadMore()">
+      @if (cvs.isLoading()) {
+      <span class="cvo-load-more-spinner"></span>
+      Caricamento…
+      } @else {
+      Carica altri
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+      }
+    </button>
+  </div>
+  }
+  }
+</div>

@@ -1,0 +1,107 @@
+<div class="w-full flex justify-center py-4 px-2">
+<button class="btn btn-default cursor-pointer bg-black text-white py-2 px-4" (click)="export(timeSheets)">
+  Scarica PDF
+</button>
+</div>
+
+
+<div #content style="font-size: 12px; overflow: auto">
+  <div *ngFor="let timesheet of timeSheets" style="margin: 4em">
+    <div style="margin-bottom: 3em">
+      <img style="width: 10em" src="logo_odda.png">
+    </div>
+    <div>
+      <table>
+        <tr>
+          <td style="font-weight: 800">
+            CLIENT
+          </td>
+          <td style="padding-left: 10px">
+            {{timesheet.client!.businessName}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800">
+            MONTH
+          </td>
+          <td style="padding-left: 10px">
+            {{monthName(timesheet.month!)}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800">
+            WORKED HOURS
+          </td>
+          <td style="padding-left: 10px">
+            {{getHours(timesheet)}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800">
+            WORKED DAYS
+          </td>
+          <td style="padding-left: 10px">
+            {{getDays(timesheet)}}
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800">
+            CONSULTANT
+          </td>
+          <td style="padding-left: 10px">
+            {{timesheet.user?.firstName}} {{timesheet.user?.lastName}}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="margin-top: 3em">
+      <table style="border: 2px solid black; width: 100%">
+        <thead style="border: 2px solid black">
+        <th style="border: black 2px solid;height: unset">Day</th>
+        <th style="border: black 2px solid;height: unset">Date</th>
+        <th style="border: black 2px solid;height: unset">Hours</th>
+        <th style="border: black 2px solid;height: unset">Extra</th>
+        <th style="border: black 2px solid;height: unset">Note</th>
+        <th style="border: black 2px solid;height: unset">Tot</th>
+        </thead>
+        <tbody style="text-align: center">
+        <tr *ngFor="let day of timesheet.workingDays"
+            style="border-bottom: 1px solid black"
+
+            [ngStyle]="{backgroundColor: getBackground(day)}">
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{dayName(day.day!)}}
+          </td>
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{day.day | date : 'dd/MM/yyyy'}}
+          </td>
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{day.hours}}
+          </td>
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{day.extra}}
+          </td>
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{day.description}}
+          </td>
+          <td style="border-right: 2px solid black;border-left: 2px solid black">
+            {{(day.hours || 0) + (day.extra || 0)}}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4"></td>
+          <td>
+            Tot.h.
+          </td>
+          <td>
+            {{getHours(timesheet)}}
+          </td>
+        </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,10 @@
+/* JSON Forms component styles */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  gap: 1rem;
+}

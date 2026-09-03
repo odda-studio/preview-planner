@@ -1,0 +1,118 @@
+<div class="flex items-center gap-2">
+    <button
+        class="px-4 py-2 cursor-pointer items-center bg-black hover:bg-black-300 disabled:bg-green-200 text-white font-medium text-sm transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+        (click)="openDialog()">
+        Prepara email
+    </button>
+    @if (hasEmails()) {
+    <button (click)="openEmailsList()" class="px-3 py-2 cursor-pointer flex items-center justify-center"
+        [title]="hasEmailsSent() ? 'Email inviate - Clicca per visualizzare' : 'Nessuna email inviata - Clicca per visualizzare'">
+        @if (hasEmailsSent()) {
+        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        } @else {
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        }
+    </button>
+    }
+
+</div>
+
+
+
+<lib-right-action-sidenav fixed [title]="'Invia email ' + context()?.company?.businessName" [(show)]="show">
+    @if (show()) {
+    <lib-invoice-mail-sender-modal [invoice]="context()"></lib-invoice-mail-sender-modal>
+    }
+</lib-right-action-sidenav>
+
+<lib-right-action-sidenav fixed [title]="'Email inviate - ' + context()?.company?.businessName"
+    [(show)]="showEmailsList">
+    @if (showEmailsList() && context()?.emails) {
+    <div class="flex flex-col h-full bg-gray-50">
+        <!-- Lista email -->
+        <div class="flex-1 overflow-y-auto">
+            @for (email of context()!.emails; track email.id) {
+            <div class="bg-white border-b border-gray-200 p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start gap-3">
+                    <!-- Icona stato -->
+                    <div class="shrink-0 mt-1">
+                        @if (email.sent) {
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        } @else {
+                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        }
+                    </div>
+
+                    <!-- Contenuto email -->
+                    <div class="flex-1 min-w-0">
+                        <!-- Header email -->
+                        <div class="space-y-1 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">Da:</span>
+                                <span class="text-sm text-gray-900 truncate">{{ email.from || email.fromEmail || '-'
+                                    }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">A:</span>
+                                <span class="text-sm text-gray-900 truncate">{{ email.to || '-' }}</span>
+                            </div>
+                            @if (email.cc) {
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">Cc:</span>
+                                <span class="text-sm text-gray-600 truncate">{{ email.cc }}</span>
+                            </div>
+                            }
+                            @if (email.bcc) {
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">Bcc:</span>
+                                <span class="text-sm text-gray-600 truncate">{{ email.bcc }}</span>
+                            </div>
+                            }
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">Oggetto:</span>
+                                <span class="text-sm font-medium text-gray-900 truncate">{{ email.subject || '-'
+                                    }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 w-16 shrink-0">Data:</span>
+                                <span class="text-xs text-gray-600">{{ email.createdAt ? (email.createdAt |
+                                    date:'dd/MM/yyyy HH:mm') : '-' }}</span>
+                            </div>
+                            @if (!email.sent && email.errorMessage) {
+                            <div class="flex items-start gap-2 mt-2">
+                                <span class="text-xs font-medium text-red-500 w-16 shrink-0">Errore:</span>
+                                <span class="text-xs text-red-600">{{ email.errorMessage }}</span>
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Body email -->
+                        @if (email.body) {
+                        <div class="border-t border-gray-200 pt-3 mt-3">
+                            <div class="text-sm text-gray-700 prose prose-sm max-w-none w-full whitespace-break-spaces" [innerHTML]="email.body"></div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        @if (!context()!.emails || context()!.emails!.length === 0) {
+        <div class="flex-1 flex items-center justify-center text-gray-500">
+            <p>Nessuna email trovata</p>
+        </div>
+        }
+    </div>
+    }
+</lib-right-action-sidenav>

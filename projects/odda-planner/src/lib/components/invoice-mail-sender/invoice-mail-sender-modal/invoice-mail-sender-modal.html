@@ -1,0 +1,115 @@
+<app-export #exporter class="!hidden"></app-export>
+
+<div class="flex flex-col h-full">
+
+    <!-- Campi To/Cc/Bcc fissi -->
+    <div class="flex flex-col gap-2 px-4 py-3 border-b border-gray-100 text-sm shrink-0">
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 text-gray-500 font-medium shrink-0">Da *</span>
+                <input [formControl]="from" type="text" placeholder="Mittente"
+                    [class]="'flex-1 border-0 border-b focus:outline-none py-1 bg-transparent ' + (from.invalid && from.touched ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-400')" />
+            </div>
+            @if (from.invalid && from.touched) {
+                <span class="text-red-500 text-xs pl-14">{{ from.errors?.['required'] ? 'Campo obbligatorio' : 'Indirizzo email non valido' }}</span>
+            }
+        </div>
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 text-gray-500 font-medium shrink-0">A *</span>
+                <input [formControl]="to" type="text" placeholder="destinatari separati da virgola"
+                    [class]="'flex-1 border-0 border-b focus:outline-none py-1 bg-transparent ' + (to.invalid && to.touched ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-400')" />
+            </div>
+            @if (to.invalid && to.touched) {
+                <span class="text-red-500 text-xs pl-14">{{ to.errors?.['required'] ? 'Campo obbligatorio' : 'Uno o più indirizzi non sono validi' }}</span>
+            }
+        </div>
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 text-gray-500 font-medium shrink-0">Cc</span>
+                <input [formControl]="cc" type="text" placeholder="destinatari in copia"
+                    [class]="'flex-1 border-0 border-b focus:outline-none py-1 bg-transparent ' + (cc.invalid && cc.touched ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-400')" />
+            </div>
+            @if (cc.invalid && cc.touched) {
+                <span class="text-red-500 text-xs pl-14">Uno o più indirizzi non sono validi</span>
+            }
+        </div>
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 text-gray-500 font-medium shrink-0">Bcc</span>
+                <input [formControl]="bcc" type="text" placeholder="destinatari in copia nascosta"
+                    [class]="'flex-1 border-0 border-b focus:outline-none py-1 bg-transparent ' + (bcc.invalid && bcc.touched ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-400')" />
+            </div>
+            @if (bcc.invalid && bcc.touched) {
+                <span class="text-red-500 text-xs pl-14">Uno o più indirizzi non sono validi</span>
+            }
+        </div>
+        <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-3">
+                <span class="w-10 text-gray-500 font-medium shrink-0">Ogg. *</span>
+                <input [formControl]="subject" type="text" placeholder="Oggetto"
+                    [class]="'flex-1 border-0 border-b focus:outline-none py-1 bg-transparent ' + (subject.invalid && subject.touched ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-blue-400')" />
+            </div>
+            @if (subject.invalid && subject.touched) {
+                <span class="text-red-500 text-xs pl-14">Campo obbligatorio</span>
+            }
+        </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="flex-1 px-4 py-4 h-[700px]">
+        <textarea #editor></textarea>
+    </div>
+
+    <!-- Allegati -->
+    @if (loading()) {
+    <div class="px-4 py-3 border-t border-gray-100 shrink-0 flex items-center gap-3 text-sm text-gray-500">
+        <svg class="animate-spin size-4 text-blue-500 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        Generazione allegati in corso...
+    </div>
+    } @else if (attachments().length > 0) {
+    <div class="px-4 py-3 border-t border-gray-100 shrink-0">
+        <div class="text-xs text-gray-400 uppercase tracking-wide mb-2 font-medium">
+            {{attachments().length}} allegat{{ attachments().length === 1 ? 'o' : 'i' }}
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @for (att of attachments(); track att.name) {
+            <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm max-w-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5 text-red-500 shrink-0">
+                    <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75-6.75a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd" />
+                    <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                </svg>
+                <span class="truncate text-gray-700 font-medium">{{ att.name }}</span>
+                <span class="text-gray-400 text-xs shrink-0">{{ formatSize(att.blob.size) }}</span>
+                <button (click)="previewPdf(att)" title="Apri anteprima" class="ml-1 text-gray-400 hover:text-blue-500 transition-colors shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                        <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <button (click)="removeAttachment(att)" title="Rimuovi allegato" class="text-gray-400 hover:text-red-500 transition-colors shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                        <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+    }
+
+    <!-- Footer fisso con pulsante Invia -->
+    <div class="flex items-center justify-end gap-3 px-4 py-4 border-t border-gray-200 shrink-0">
+        <button
+        (click)="sendInvoice()"
+            [disabled]="loading()"
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+            Invia
+        </button>
+    </div>
+    
+
+</div>

@@ -1,0 +1,33 @@
+<div class="pdf-viewer-container">
+  @if (pdfUrl()) {
+    <ngx-extended-pdf-viewer
+      #pdf
+      [src]="pdfUrl()!"
+      [showToolbar]="true"
+      [showSidebarButton]="false"
+      [showFindButton]="true"
+      [showPagingButtons]="true"
+      [showZoomButtons]="true"
+      [showPresentationModeButton]="false"
+      [showOpenFileButton]="false"
+      [showPrintButton]="true"
+      [showDownloadButton]="true"
+      [showSecondaryToolbarButton]="true"
+      [showRotateButton]="true"
+      [showHandToolButton]="false"
+      [showSpreadButton]="false"
+      [showPropertiesButton]="false"
+      [ignoreKeyboard]="true"
+      [height]="'100%'"
+      backgroundColor="#525659"
+    ></ngx-extended-pdf-viewer>
+  } @else if (visible()) {
+    <div class="no-pdf">
+      <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+      </svg>
+      <p>Nessun PDF da visualizzare</p>
+    </div>
+  }
+</div>

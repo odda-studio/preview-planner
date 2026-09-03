@@ -1,0 +1,219 @@
+.filter-header-container {
+  position: relative;
+  width: 100%;
+  min-width: 200px;
+}
+
+.filter-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.25rem;
+  transition: all 0.2s ease-in-out;
+
+  &:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.filter-input {
+  flex: 1;
+  outline: none;
+  font-size: 0.875rem;
+  background-color: transparent;
+  width: 100%;
+
+  border: solid rgba(0, 0, 0, 0.497) 1px;
+
+  border-radius: 4px;
+  padding: .75em 1em;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  // Specific styles for select element
+  &[type="select"],
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    padding-right: 2rem;
+  }
+}
+
+.operation-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+  }
+
+  &:active {
+    background-color: #d1d5db;
+  }
+}
+
+.operation-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-arrow {
+  width: 12px;
+  height: 12px;
+  color: #6b7280;
+  transition: transform 0.2s ease-in-out;
+}
+
+.operation-button:hover .dropdown-arrow {
+  color: #374151;
+}
+
+.clear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+
+.apply-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  transition: all 0.2s ease-in-out;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.operations-menu {
+  position: absolute;
+  top: 100%;
+  z-index: 50;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  width: 100%;
+  animation: slideDown 0.15s ease-out;
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.operation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  font-size: 0.875rem;
+
+  &:hover {
+    background-color: #f3f4f6;
+  }
+
+  &.active {
+    background-color: #dbeafe;
+    color: #1e40af;
+    font-weight: 500;
+
+    .operation-icon-menu {
+      background-color: #3b82f6;
+      color: white;
+    }
+  }
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+.operation-icon-menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 0.25rem;
+  background-color: #e5e7eb;
+  color: #374151;
+  transition: all 0.15s ease-in-out;
+}
+
+.operation-label {
+  flex: 1;
+}
+

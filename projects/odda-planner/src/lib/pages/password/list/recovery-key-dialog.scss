@@ -1,0 +1,175 @@
+mat-dialog-content {
+  min-width: 650px;
+  max-width: 750px;
+  padding: 1.5rem 1.5rem;
+}
+
+.success-message {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f0fdf4;
+  border-radius: 8px;
+
+  p {
+    margin: 1rem 0 0;
+    font-size: 1rem;
+    color: #047857;
+
+    strong {
+      color: #065f46;
+      font-weight: 600;
+    }
+  }
+}
+
+.success-icon {
+  display: flex;
+  justify-content: center;
+  
+  svg {
+    color: #10b981;
+  }
+}
+
+.recovery-section {
+  margin-bottom: 2rem;
+}
+
+.warning-box {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+
+  mat-icon {
+    color: #f59e0b;
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0;
+    color: #78350f;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+}
+
+.recovery-key-display {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.key-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #1e293b;
+  border-radius: 6px;
+  border: 2px solid #334155;
+
+  code {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 1.125rem;
+    letter-spacing: 0.05em;
+    color: #22d3ee;
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  button {
+    color: #94a3b8;
+
+    &:hover {
+      color: #cbd5e1;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.checklist {
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  mat-checkbox {
+    display: block;
+    margin-bottom: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.tips-section {
+  background: #eff6ff;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #3b82f6;
+
+  h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e40af;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #1e3a8a;
+    font-size: 0.875rem;
+    line-height: 1.8;
+
+    li {
+      margin-bottom: 0.25rem;
+
+      strong {
+        color: #dc2626;
+      }
+    }
+  }
+}
+
+mat-dialog-actions {
+  padding: 1.5rem 0 0;
+  margin: 0;
+
+  button {
+    min-width: 280px;
+    padding: 0.75rem 2rem;
+  }
+}
